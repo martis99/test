@@ -1,4 +1,4 @@
-NAME: Test
+NAME: test
 TYPE: LIB
 SOURCE: src
 INCLUDE: include
