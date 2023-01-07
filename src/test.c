@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 struct tdata {
+	int width;
 	long long passed;
 	long long failed;
 	int depth;
@@ -40,44 +41,36 @@ void *t_get_priv()
 	return s_priv;
 }
 
-void t_sprint()
+static inline void t_sprint()
 {
 	int r = _setmode(_fileno(stdout), _O_U16TEXT);
 }
 
-void t_print(const unsigned short *fmt, ...)
-{
-	va_list args;
-
-	va_start(args, fmt);
-	vwprintf_s(fmt, args);
-	va_end(args);
-}
-
-void t_eprint()
+static inline void t_eprint()
 {
 	int r = _setmode(_fileno(stdout), _O_TEXT);
 }
 
-void pur()
+static inline void pur()
 {
-	wprintf(L"└─");
+	wprintf_s(L"└─");
 }
 
-void pv()
+static inline void pv()
 {
-	wprintf(L"│ ");
+	wprintf_s(L"│ ");
 }
 
-void pvr()
+static inline void pvr()
 {
-	wprintf(L"├─");
+	wprintf_s(L"├─");
 }
 
-void t_init()
+void t_init(int width)
 {
 	t_sprint();
 
+	s_data.width  = width;
 	s_data.passed = 0;
 	s_data.failed = 0;
 	s_data.depth  = -1;
@@ -101,10 +94,11 @@ int t_end(int passed, const char *func)
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
 			pv();
-			wprintf(L"  ");
+			wprintf_s(L"  ");
 		}
 		pvr();
-		wprintf(L"\033[0;32m%-52hs OK\033[0m\n", func);
+		wprintf_s(L"\033[0;32m%-64hs %*hsOK\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+
 		s_data.passed++;
 		return 0;
 	}
@@ -117,12 +111,12 @@ void t_sstart(const char *func)
 {
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
-		wprintf(L"  ");
+		wprintf_s(L"  ");
 	}
 	if (s_data.depth >= 0) {
 		pvr();
 	}
-	wprintf(L"%hs\n", func);
+	wprintf_s(L"%hs\n", func);
 	s_data.depth++;
 }
 
@@ -130,40 +124,101 @@ int t_send(int passed, int failed)
 {
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
-		wprintf(L"  ");
+		wprintf_s(L"  ");
 	}
 	pur();
 	if (failed == 0) {
-		wprintf(L"\033[0;32mPASSED %d %hs\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
+		wprintf_s(L"\033[0;32mPASSED %d %hs\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
 	} else {
-		wprintf(L"\033[0;31mFAILED %d/%d %hs\033[0m\n", failed, failed + passed, failed == 1 ? "TEST" : "TESTS");
+		wprintf_s(L"\033[0;31mFAILED %d/%d %hs\033[0m\n", failed, failed + passed, failed == 1 ? "TEST" : "TESTS");
 	}
 	s_data.depth--;
 	return failed > 0;
 }
 
-void t_expect(int passed, const char *func)
+void t_expect_ch(int passed, const char *func, const char *check, int line)
 {
+	t_sprint();
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
 			pv();
-			wprintf(L"  ");
+			wprintf_s(L"  ");
 		}
 		pvr();
-		wprintf(L"\033[0;31m%-52hs FAILED\033[0m\n", func);
+		wprintf_s(L"\033[0;31m%-64hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
 	}
 	for (int i = 0; i < s_data.depth + 1; i++) {
 		pv();
-		wprintf(L"  ");
+		wprintf_s(L"  ");
 	}
 	pvr();
+
+	wprintf_s(L"\033[0;31m%-64hs %*hsL%d\033[0m\n", check, (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+
+	t_eprint();
+}
+
+void t_expect_eq(int passed, const char *func, const char *actual, const char *expected, int line, ...)
+{
+	t_sprint();
+	if (passed) {
+		for (int i = 0; i < s_data.depth; i++) {
+			pv();
+			wprintf_s(L"  ");
+		}
+		pvr();
+		wprintf_s(L"\033[0;31m%-64hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+	}
+	for (int i = 0; i < s_data.depth + 1; i++) {
+		pv();
+		wprintf_s(L"  ");
+	}
+	pvr();
+
+	wprintf_s(L"\033[0;31m%-19hs (", actual);
+
+	va_list args;
+	va_start(args, line);
+	vwprintf_s(L"0x%08X", args);
+	va_end(args);
+
+	wprintf_s(L") == %-28hs %*hsL%d\033[0m\n", expected, (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	t_eprint();
+}
+
+void t_expect_ne(int passed, const char *func, const char *actual, const char *expected, int line, ...)
+{
+	t_sprint();
+	if (passed) {
+		for (int i = 0; i < s_data.depth; i++) {
+			pv();
+			wprintf_s(L"  ");
+		}
+		pvr();
+		wprintf_s(L"\033[0;31m%-64hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+	}
+	for (int i = 0; i < s_data.depth + 1; i++) {
+		pv();
+		wprintf_s(L"  ");
+	}
+	pvr();
+
+	wprintf_s(L"\033[0;31m%-19hs (", actual);
+
+	va_list args;
+	va_start(args, line);
+	vwprintf_s(L"0x%08X", args);
+	va_end(args);
+
+	wprintf_s(L") != %-28hs %*hsL%d\033[0m\n", expected, (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	t_eprint();
 }
 
 void t_results()
 {
 	if (s_data.failed == 0) {
-		wprintf(L"\033[0;32mPASSED %llu %hs\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
+		wprintf_s(L"\033[0;32mPASSED %llu %hs\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
 	} else {
-		wprintf(L"\033[0;31mFAILED %llu/%llu %hs\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
+		wprintf_s(L"\033[0;31mFAILED %llu/%llu %hs\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
 	}
 }
