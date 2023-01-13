@@ -1,1 +1,278 @@
 # test
+test - simple testing library for C.
+
+***
+
+## Usage
+### Single test
+```C
+#include "test.h"
+
+TEST(test)
+{
+	START;
+	EXPECT_EQ(4 + 5, 9);
+	END;
+}
+
+int main(int argc, char **argv)
+{
+	t_init(2);
+	SSTART;
+	RUN(test);
+	SEND;
+	t_free();
+}
+```
+#### Passed
+![image](https://user-images.githubusercontent.com/61162271/212423027-eb884f46-60f5-4778-97a5-b96fc8deff60.png)
+#### Failed
+![image](https://user-images.githubusercontent.com/61162271/212423244-5ecb1f53-22f1-4530-9a6c-4ce54f78f2db.png)
+
+### Multiple tests
+```C
+#include "test.h"
+
+TEST(test1)
+{
+	START;
+	EXPECT_EQ(4 + 5, 9);
+	END;
+}
+
+TEST(test2)
+{
+	START;
+	int a = 5 * 6;
+	EXPECT_EQ(a, 30);
+	END;
+}
+
+TEST(test3)
+{
+	START;
+	int a = 8;
+	int b = 2;
+	EXPECT_EQ(a / b, 4);
+	END;
+}
+
+int main(int argc, char **argv)
+{
+	t_init(2);
+	SSTART;
+	RUN(test1);
+	RUN(test2);
+	RUN(test3);
+	SEND;
+	t_free();
+}
+```
+#### Passed
+![image](https://user-images.githubusercontent.com/61162271/212424188-e3a3810f-18ec-4521-91c2-8d7dee169da2.png)
+#### Failed
+![image](https://user-images.githubusercontent.com/61162271/212424400-a80e28e1-4927-4b76-9523-79575d9f5dc6.png)
+
+### Parameterized Tests
+```C
+#include "test.h"
+
+TEST(test, int a, int b, int c)
+{
+	START;
+	EXPECT_EQ(a + b, c);
+	END;
+}
+
+int main(int argc, char **argv)
+{
+	t_init(2);
+	SSTART;
+	RUN(test, 4, 5, 9);
+	RUN(test, 1, 2, 3);
+	RUN(test, 2, 4, 6);
+	SEND;
+	t_free();
+}
+```
+
+### Multiple level tests
+```C
+#include "test.h"
+
+TEST(grand_child1, int a, int b)
+{
+	START;
+	EXPECT_EQ(a + 5, b);
+	END;
+}
+
+TEST(child1)
+{
+	SSTART;
+	RUN(grand_child1, 3, 8);
+	RUN(grand_child1, 4, 9);
+	RUN(grand_child1, 5, 11);
+	RUN(grand_child1, 6, 14);
+	SEND;
+}
+
+TEST(grand_child2, int a, int b)
+{
+	START;
+	EXPECT_EQ(a / 5, b);
+	EXPECT_EQ(6 - 5, 1);
+	END;
+}
+
+TEST(child2)
+{
+	SSTART;
+	RUN(grand_child2, 10, 2);
+	RUN(grand_child2, 20, 3);
+	RUN(grand_child2, 30, 6);
+	RUN(grand_child2, 40, 4);
+	SEND;
+}
+
+TEST(parent)
+{
+	SSTART;
+	RUN(child1);
+	RUN(child2);
+	SEND;
+}
+
+int main(int argc, char **argv)
+{
+	t_init(4);
+	SSTART;
+	RUN(parent);
+	SEND;
+	t_free();
+}
+```
+![image](https://user-images.githubusercontent.com/61162271/212425987-aa94cb4a-83c2-4cbf-b660-3dfad31a2dc9.png)
+
+### Tests in multiple files
+child1.h
+```C
+#ifndef CHILD1_H
+#define CHILD1_H
+
+#include "test_h.h"
+
+STEST(child1);
+
+#endif
+
+```
+child1.c
+```C
+#include "child1.h"
+
+TEST(grand_child1, int a, int b)
+{
+	START;
+	EXPECT_EQ(a + 5, b);
+	END;
+}
+
+STEST(child1)
+{
+	SSTART;
+	RUN(grand_child1, 3, 8);
+	RUN(grand_child1, 4, 9);
+	RUN(grand_child1, 5, 11);
+	RUN(grand_child1, 6, 14);
+	SEND;
+}
+```
+main.c
+```C
+#include "child1.h"
+#include "test.h"
+
+TEST(grand_child2, int a, int b)
+{
+	START;
+	EXPECT_EQ(a / 5, b);
+	EXPECT_EQ(6 - 5, 1);
+	END;
+}
+
+TEST(child2)
+{
+	SSTART;
+	RUN(grand_child2, 10, 2);
+	RUN(grand_child2, 20, 3);
+	RUN(grand_child2, 30, 6);
+	RUN(grand_child2, 40, 4);
+	SEND;
+}
+
+TEST(parent)
+{
+	SSTART;
+	RUN(child1);
+	RUN(child2);
+	SEND;
+}
+
+int main(int argc, char **argv)
+{
+	t_init(4);
+	SSTART;
+	RUN(parent);
+	SEND;
+	t_free();
+}
+```
+### Setup & Teardown
+`setup` and `teardown` functions provided in `t_setup` and `t_teardown` are ran before and after every `TEST` function.
+```C
+#include "test.h"
+
+int setup(void *priv)
+{
+	int *a = priv;
+	*a     = 5;
+	return 0;
+}
+
+int teardown(void *priv)
+{
+	int *a = priv;
+	*a     = 0;
+	return 0;
+}
+
+TEST(test, int v)
+{
+	START;
+	int *a = t_get_priv();
+	EXPECT_EQ(*a, v);
+	END;
+}
+
+static void run_tests()
+{
+	SSTART;
+	RUN(test, 5);
+	RUN(test, 4);
+	SEND;
+}
+
+int main(int argc, char **argv)
+{
+	int a;
+	t_set_priv(&a);
+	t_setup(setup);
+	t_teardown(teardown);
+
+	t_init(4);
+	run_tests();
+	t_results();
+	t_free();
+}
+```
