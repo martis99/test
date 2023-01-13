@@ -84,12 +84,16 @@ void t_free()
 void t_start()
 {
 	t_eprint();
-	s_setup(s_priv);
+	if (s_setup) {
+		s_setup(s_priv);
+	}
 }
 
 int t_end(int passed, const char *func)
 {
-	s_teardown(s_priv);
+	if (s_teardown) {
+		s_teardown(s_priv);
+	}
 	t_sprint();
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
