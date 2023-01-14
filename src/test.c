@@ -8,6 +8,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define BYTE_TO_BIN_PATTERN L"%c%c%c%c%c%c%c%c"
+// clang-format off
+#define BYTE_TO_BIN(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
+// clang-format on
+
 struct tdata {
 	int width;
 	long long passed;
@@ -187,6 +200,34 @@ void t_expect_eq(int passed, const char *func, const char *actual, const char *e
 	va_end(args);
 
 	wprintf_s(L") == %-28hs %*hsL%d\033[0m\n", expected, (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	t_eprint();
+}
+
+void t_expect_eqm(int passed, const char *func, const char *actual, const char *expected, const char *mask_str, unsigned char mask, int line, ...)
+{
+	t_sprint();
+	if (passed) {
+		for (int i = 0; i < s_data.depth; i++) {
+			pv();
+			wprintf_s(L"  ");
+		}
+		pvr();
+		wprintf_s(L"\033[0;31m%-64hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+	}
+	for (int i = 0; i < s_data.depth + 1; i++) {
+		pv();
+		wprintf_s(L"  ");
+	}
+	pvr();
+
+	wprintf_s(L"\033[0;31m%-19hs (", actual);
+
+	va_list args;
+	va_start(args, line);
+	vwprintf_s(L"0x%08X", args);
+	va_end(args);
+
+	wprintf_s(L") == %-17hs 0b" BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", expected, BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
 	t_eprint();
 }
 

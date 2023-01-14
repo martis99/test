@@ -21,6 +21,7 @@ int t_send(int passed, int failed);
 
 void t_expect_ch(int passed, const char *func, const char *check, int line);
 void t_expect_eq(int passed, const char *func, const char *actual, const char *expected, int line, ...);
+void t_expect_eqm(int passed, const char *func, const char *actual, const char *expected, const char *mask_str, unsigned char mask, int line, ...);
 void t_expect_ne(int passed, const char *func, const char *actual, const char *expected, int line, ...);
 
 void t_results();
@@ -69,6 +70,14 @@ void t_results();
 			t_expect_eq(_passed, __func__, #_actual, #_expected, __LINE__, _actual); \
 			_passed = 0;                                                             \
 		}                                                                                \
+	} while (0)
+
+#define EXPECT_EQM(_actual, _expected, _mask)                                                                    \
+	do {                                                                                                     \
+		if (((_actual) & (_mask)) != ((_expected) & (_mask))) {                                          \
+			t_expect_eqm(_passed, __func__, #_actual, #_expected, #_mask, _mask, __LINE__, _actual); \
+			_passed = 0;                                                                             \
+		}                                                                                                \
 	} while (0)
 
 #define EXPECT_NE(_actual, _expected)                                                            \
