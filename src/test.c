@@ -302,7 +302,7 @@ void t_expect_ch(int passed, const char *func, int line, const char *check)
 		r = 1;
 		m = -74;
 	} else {
-		l = (44 - strlen(check)) / 2;
+		l = (44 - len) / 2;
 		r = l + 31;
 		m = 0;
 	}
