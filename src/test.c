@@ -1,14 +1,34 @@
 ﻿#include "test.h"
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	#define T_WIN
+	#if defined(_WIN64)
+		#define T_WIN64
+	#else
+		#define T_WIN32
+	#endif
+#elif __linux__
+	#define T_LINUX
+#else
+	#error "Platform not supported"
+#endif
+
 #include <assert.h>
 #include <fcntl.h>
-#include <io.h>
+#if defined(T_WIN)
+	#include <io.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define BYTE_TO_BIN_PATTERN L"%c%c%c%c%c%c%c%c"
+#if defined(T_WIN)
+	#define BYTE_TO_BIN_PATTERN L"%c%c%c%c%c%c%c%c"
+#else
+	#define BYTE_TO_BIN_PATTERN "%c%c%c%c%c%c%c%c"
+#endif
+
 // clang-format off
 #define BYTE_TO_BIN(byte)  \
   (byte & 0x80 ? '1' : '0'), \
@@ -56,27 +76,43 @@ void *t_get_priv()
 
 static inline void t_sprint()
 {
+#if defined(T_WIN)
 	int r = _setmode(_fileno(stdout), _O_U16TEXT);
+#endif
 }
 
 static inline void t_eprint()
 {
+#if defined(T_WIN)
 	int r = _setmode(_fileno(stdout), _O_TEXT);
+#endif
 }
 
 static inline void pur()
 {
+#if defined(T_WIN)
 	wprintf_s(L"└─");
+#else
+	printf("└─");
+#endif
 }
 
 static inline void pv()
 {
+#if defined(T_WIN)
 	wprintf_s(L"│ ");
+#else
+	printf("│ ");
+#endif
 }
 
 static inline void pvr()
 {
+#if defined(T_WIN)
 	wprintf_s(L"├─");
+#else
+	printf("├─");
+#endif
 }
 
 void t_init(int width)
@@ -111,10 +147,18 @@ int t_end(int passed, const char *func)
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
 			pv();
+#if defined(T_WIN)
 			wprintf_s(L"  ");
+#else
+			printf("  ");
+#endif
 		}
 		pvr();
+#if defined(T_WIN)
 		wprintf_s(L"\033[0;32m%-75hs %*hsOK\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+#else
+		printf("\033[0;32m%-75s %*sOK\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+#endif
 
 		s_data.passed++;
 		return 0;
@@ -128,12 +172,20 @@ void t_sstart(const char *func)
 {
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
+#if defined(T_WIN)
 		wprintf_s(L"  ");
+#else
+		printf("  ");
+#endif
 	}
 	if (s_data.depth >= 0) {
 		pvr();
 	}
+#if defined(T_WIN)
 	wprintf_s(L"%hs\n", func);
+#else
+	printf("%s\n", func);
+#endif
 	s_data.depth++;
 }
 
@@ -141,13 +193,25 @@ int t_send(int passed, int failed)
 {
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
+#if defined(T_WIN)
 		wprintf_s(L"  ");
+#else
+		printf("  ");
+#endif
 	}
 	pur();
 	if (failed == 0) {
+#if defined(T_WIN)
 		wprintf_s(L"\033[0;32mPASSED %d %hs\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
+#else
+		printf("\033[0;32mPASSED %d %s\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
+#endif
 	} else {
+#if defined(T_WIN)
 		wprintf_s(L"\033[0;31mFAILED %d/%d %hs\033[0m\n", failed, failed + passed, failed == 1 ? "TEST" : "TESTS");
+#else
+		printf("\033[0;31mFAILED %d/%d %s\033[0m\n", failed, failed + passed, failed == 1 ? "TEST" : "TESTS");
+#endif
 	}
 	s_data.depth--;
 	return failed > 0;
@@ -159,14 +223,26 @@ static void print_header(int passed, const char *func)
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
 			pv();
+#if defined(T_WIN)
 			wprintf_s(L"  ");
+#else
+			printf("  ");
+#endif
 		}
 		pvr();
+#if defined(T_WIN)
 		wprintf_s(L"\033[0;31m%-75hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+#else
+		printf("\033[0;31m%-75s %*sFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+#endif
 	}
 	for (int i = 0; i < s_data.depth + 1; i++) {
 		pv();
+#if defined(T_WIN)
 		wprintf_s(L"  ");
+#else
+		printf("  ");
+#endif
 	}
 	pvr();
 }
@@ -175,17 +251,17 @@ static char get_char(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1:
-		return (char)va_arg(args, char);
-	case 2:
-		return (char)va_arg(args, short);
-	case 4:
-		return (char)va_arg(args, int);
-	case 8:
-		return (char)va_arg(args, long long);
+	case 1: return (char)va_arg(args, char);
+	case 2: return (char)va_arg(args, short);
+	case 4: return (char)va_arg(args, int);
+	case 8: return (char)va_arg(args, long long);
 	}
 
-	wprintf_s(L"Unsupported type of size: %llu\n", size);
+#if defined(T_WIN)
+	wprintf_s(L"Unsupported type of size: %zd\n", size);
+#else
+	printf("Unsupported type of size: %zd\n", size);
+#endif
 	assert(0);
 	return 0;
 }
@@ -194,17 +270,17 @@ static short get_short(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1:
-		return (short)va_arg(args, char);
-	case 2:
-		return (short)va_arg(args, short);
-	case 4:
-		return (short)va_arg(args, int);
-	case 8:
-		return (short)va_arg(args, long long);
+	case 1: return (short)va_arg(args, char);
+	case 2: return (short)va_arg(args, short);
+	case 4: return (short)va_arg(args, int);
+	case 8: return (short)va_arg(args, long long);
 	}
 
-	wprintf_s(L"Unsupported type of size: %llu\n", size);
+#if defined(T_WIN)
+	wprintf_s(L"Unsupported type of size: %zd\n", size);
+#else
+	printf("Unsupported type of size: %zd\n", size);
+#endif
 	assert(0);
 	return 0;
 }
@@ -213,17 +289,17 @@ static int get_int(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1:
-		return (int)va_arg(args, char);
-	case 2:
-		return (int)va_arg(args, short);
-	case 4:
-		return (int)va_arg(args, int);
-	case 8:
-		return (int)va_arg(args, long long);
+	case 1: return (int)va_arg(args, char);
+	case 2: return (int)va_arg(args, short);
+	case 4: return (int)va_arg(args, int);
+	case 8: return (int)va_arg(args, long long);
 	}
 
-	wprintf_s(L"Unsupported type of size: %llu\n", size);
+#if defined(T_WIN)
+	wprintf_s(L"Unsupported type of size: %zd\n", size);
+#else
+	printf("Unsupported type of size: %zd\n", size);
+#endif
 	assert(0);
 	return 0;
 }
@@ -232,17 +308,17 @@ static long long get_long(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1:
-		return (long long)va_arg(args, char);
-	case 2:
-		return (long long)va_arg(args, short);
-	case 4:
-		return (long long)va_arg(args, int);
-	case 8:
-		return (long long)va_arg(args, long long);
+	case 1: return (long long)va_arg(args, char);
+	case 2: return (long long)va_arg(args, short);
+	case 4: return (long long)va_arg(args, int);
+	case 8: return (long long)va_arg(args, long long);
 	}
 
-	wprintf_s(L"Unsupported type: %llu\n", size);
+#if defined(T_WIN)
+	wprintf_s(L"Unsupported type: %zd\n", size);
+#else
+	printf("Unsupported type: %zd\n", size);
+#endif
 	assert(0);
 	return 0;
 }
@@ -251,41 +327,69 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 {
 	print_header(passed, func);
 
+#if defined(T_WIN)
 	wprintf_s(L"\033[0;31m%20hs %hs %-20hs ", act, cond, exp);
+#else
+	printf("\033[0;31m%20s %s %-20s ", act, cond, exp);
+#endif
 
 	switch (act_size) {
 	case 0: {
 		char a = va_arg(args, char);
 		char b = get_char(exp_size, args);
+#if defined(T_WIN)
 		wprintf_s(L"       %c %hs %c       ", a ? '1' : '0', cond, b ? '1' : '0');
+#else
+		printf("       %c %s %c       ", a ? '1' : '0', cond, b ? '1' : '0');
+#endif
 		break;
 	}
 	case 1: {
 		unsigned char a = va_arg(args, unsigned char);
 		unsigned char b = va_arg(args, unsigned char);
+#if defined(T_WIN)
 		wprintf_s(BYTE_TO_BIN_PATTERN L" %hs " BYTE_TO_BIN_PATTERN, BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b));
+#else
+		printf(BYTE_TO_BIN_PATTERN " %s " BYTE_TO_BIN_PATTERN, BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b));
+#endif
 		break;
 	}
 	case 2: {
-		short a = va_arg(args, short);
+		short a = (short)va_arg(args, short);
 		short b = get_short(exp_size, args);
+#if defined(T_WIN)
 		wprintf_s(L"%08X %hs %08X", a, cond, b);
+#else
+		printf("%08X %s %08X", a, cond, b);
+#endif
 		break;
 	}
 	case 4: {
 		int a = va_arg(args, int);
 		int b = get_int(exp_size, args);
+#if defined(T_WIN)
 		wprintf_s(L"%08X %hs %08X", a, cond, b);
+#else
+		printf("%08X %s %08X", a, cond, b);
+#endif
 		break;
 	}
 	case 8: {
 		long long a = va_arg(args, long long);
 		long long b = get_long(exp_size, args);
+#if defined(T_WIN)
 		wprintf_s(L"%p %hs %p", (void *)a, cond, (void *)b);
+#else
+		printf("%p %s %p", (void *)a, cond, (void *)b);
+#endif
 		break;
 	}
 	default:
-		wprintf_s(L"Unsupported type: %llu\n", act_size);
+#if defined(T_WIN)
+		wprintf_s(L"Unsupported type: %zd\n", act_size);
+#else
+		printf("Unsupported type: %zd\n", act_size);
+#endif
 		assert(0);
 	}
 }
@@ -307,7 +411,11 @@ void t_expect_ch(int passed, const char *func, int line, const char *check)
 		m = 0;
 	}
 
+#if defined(T_WIN)
 	wprintf_s(L"\033[0;31m%*hs%*hs %*hsL%d\033[0m\n", l, "", m, check, r + (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("\033[0;31m%*s%*s %*sL%d\033[0m\n", l, "", m, check, r + (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 
 	t_eprint();
 }
@@ -318,7 +426,12 @@ void t_expect_eq(int passed, const char *func, int line, const char *act, size_t
 	va_start(args, exp_size);
 	print_values(passed, func, act, act_size, exp, exp_size, "==", args);
 	va_end(args);
+
+#if defined(T_WIN)
 	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 	t_eprint();
 }
 
@@ -330,7 +443,11 @@ void t_expect_eqm(int passed, const char *func, int line, const char *act, size_
 	print_values(passed, func, act, act_size, exp, exp_size, "==", args);
 	va_end(args);
 
+#if defined(T_WIN)
 	wprintf_s(L"  " BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("  " BYTE_TO_BIN_PATTERN " %*sL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 	t_eprint();
 }
 
@@ -341,7 +458,11 @@ void t_expect_eqb(int passed, const char *func, int line, const char *act, const
 	print_values(passed, func, act, 0, exp, 0, "==", args);
 	va_end(args);
 
+#if defined(T_WIN)
 	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 	t_eprint();
 }
 
@@ -351,7 +472,12 @@ void t_expect_ne(int passed, const char *func, int line, const char *act, size_t
 	va_start(args, exp_size);
 	print_values(passed, func, act, act_size, exp, exp_size, "!=", args);
 	va_end(args);
+
+#if defined(T_WIN)
 	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 	t_eprint();
 }
 
@@ -363,7 +489,11 @@ void t_expect_nem(int passed, const char *func, int line, const char *act, size_
 	print_values(passed, func, act, act_size, exp, exp_size, "!=", args);
 	va_end(args);
 
+#if defined(T_WIN)
 	wprintf_s(L"  " BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("  " BYTE_TO_BIN_PATTERN " %*sL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 	t_eprint();
 }
 
@@ -374,15 +504,27 @@ void t_expect_neb(int passed, const char *func, int line, const char *act, const
 	print_values(passed, func, act, 0, exp, 0, "!=", args);
 	va_end(args);
 
+#if defined(T_WIN)
 	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#else
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+#endif
 	t_eprint();
 }
 
 void t_results()
 {
 	if (s_data.failed == 0) {
+#if defined(T_WIN)
 		wprintf_s(L"\033[0;32mPASSED %llu %hs\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
+#else
+		printf("\033[0;32mPASSED %llu %s\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
+#endif
 	} else {
+#if defined(T_WIN)
 		wprintf_s(L"\033[0;31mFAILED %llu/%llu %hs\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
+#else
+		printf("\033[0;31mFAILED %llu/%llu %s\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
+#endif
 	}
 }

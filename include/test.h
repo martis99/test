@@ -36,7 +36,7 @@ void t_expect_neb(int passed, const char *func, int line, const char *act, const
 void t_results();
 
 //Declare test
-#define TEST(_name, ...) static inline int _name##(__VA_ARGS__)
+#define TEST(_name, ...) static inline int _name(__VA_ARGS__)
 
 //Test start
 #define START            \
