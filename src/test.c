@@ -147,17 +147,12 @@ int t_end(int passed, const char *func)
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
 			pv();
-#if defined(T_WIN)
-			wprintf_s(L"  ");
-#else
-			printf("  ");
-#endif
 		}
 		pvr();
 #if defined(T_WIN)
-		wprintf_s(L"\033[0;32m%-75hs %*hsOK\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+		wprintf_s(L"\033[0;32m%-75hs %*hsOK\033[0m\n", func, (s_data.width - s_data.depth) * 2, " ");
 #else
-		printf("\033[0;32m%-75s %*sOK\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+		printf("\033[0;32m%-75s %*sOK\033[0m\n", func, (s_data.width - s_data.depth) * 2, " ");
 #endif
 
 		s_data.passed++;
@@ -172,11 +167,6 @@ void t_sstart(const char *func)
 {
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
-#if defined(T_WIN)
-		wprintf_s(L"  ");
-#else
-		printf("  ");
-#endif
 	}
 	if (s_data.depth >= 0) {
 		pvr();
@@ -193,11 +183,6 @@ int t_send(int passed, int failed)
 {
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
-#if defined(T_WIN)
-		wprintf_s(L"  ");
-#else
-		printf("  ");
-#endif
 	}
 	pur();
 	if (failed == 0) {
@@ -223,26 +208,16 @@ static void print_header(int passed, const char *func)
 	if (passed) {
 		for (int i = 0; i < s_data.depth; i++) {
 			pv();
-#if defined(T_WIN)
-			wprintf_s(L"  ");
-#else
-			printf("  ");
-#endif
 		}
 		pvr();
 #if defined(T_WIN)
-		wprintf_s(L"\033[0;31m%-75hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+		wprintf_s(L"\033[0;31m%-75hs %*hsFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 2, " ");
 #else
-		printf("\033[0;31m%-75s %*sFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 4, " ");
+		printf("\033[0;31m%-75s %*sFAILED\033[0m\n", func, (s_data.width - s_data.depth) * 2, " ");
 #endif
 	}
 	for (int i = 0; i < s_data.depth + 1; i++) {
 		pv();
-#if defined(T_WIN)
-		wprintf_s(L"  ");
-#else
-		printf("  ");
-#endif
 	}
 	pvr();
 }
@@ -412,9 +387,9 @@ void t_expect_ch(int passed, const char *func, int line, const char *check)
 	}
 
 #if defined(T_WIN)
-	wprintf_s(L"\033[0;31m%*hs%*hs %*hsL%d\033[0m\n", l, "", m, check, r + (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"\033[0;31m%*hs%*hs %*hsL%d\033[0m\n", l, "", m, check, r + (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("\033[0;31m%*s%*s %*sL%d\033[0m\n", l, "", m, check, r + (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("\033[0;31m%*s%*s %*sL%d\033[0m\n", l, "", m, check, r + (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 
 	t_eprint();
@@ -428,9 +403,9 @@ void t_expect_eq(int passed, const char *func, int line, const char *act, size_t
 	va_end(args);
 
 #if defined(T_WIN)
-	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 	t_eprint();
 }
@@ -444,9 +419,9 @@ void t_expect_eqm(int passed, const char *func, int line, const char *act, size_
 	va_end(args);
 
 #if defined(T_WIN)
-	wprintf_s(L"  " BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"  " BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("  " BYTE_TO_BIN_PATTERN " %*sL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("  " BYTE_TO_BIN_PATTERN " %*sL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 	t_eprint();
 }
@@ -459,9 +434,9 @@ void t_expect_eqb(int passed, const char *func, int line, const char *act, const
 	va_end(args);
 
 #if defined(T_WIN)
-	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 	t_eprint();
 }
@@ -474,9 +449,9 @@ void t_expect_ne(int passed, const char *func, int line, const char *act, size_t
 	va_end(args);
 
 #if defined(T_WIN)
-	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 	t_eprint();
 }
@@ -490,9 +465,9 @@ void t_expect_nem(int passed, const char *func, int line, const char *act, size_
 	va_end(args);
 
 #if defined(T_WIN)
-	wprintf_s(L"  " BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"  " BYTE_TO_BIN_PATTERN L" %*hsL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("  " BYTE_TO_BIN_PATTERN " %*sL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("  " BYTE_TO_BIN_PATTERN " %*sL%d\033[0m\n", BYTE_TO_BIN(mask), (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 	t_eprint();
 }
@@ -505,9 +480,9 @@ void t_expect_neb(int passed, const char *func, int line, const char *act, const
 	va_end(args);
 
 #if defined(T_WIN)
-	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	wprintf_s(L"           %*hsL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #else
-	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 4, " ", line);
+	printf("           %*sL%d\033[0m\n", (s_data.width - (s_data.depth + 1)) * 2, " ", line);
 #endif
 	t_eprint();
 }
