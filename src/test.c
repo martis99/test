@@ -226,8 +226,8 @@ static char get_char(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1: return (char)va_arg(args, char);
-	case 2: return (char)va_arg(args, short);
+	case 1: return (char)va_arg(args, int);
+	case 2: return (char)va_arg(args, int);
 	case 4: return (char)va_arg(args, int);
 	case 8: return (char)va_arg(args, long long);
 	}
@@ -245,8 +245,8 @@ static short get_short(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1: return (short)va_arg(args, char);
-	case 2: return (short)va_arg(args, short);
+	case 1: return (short)va_arg(args, int);
+	case 2: return (short)va_arg(args, int);
 	case 4: return (short)va_arg(args, int);
 	case 8: return (short)va_arg(args, long long);
 	}
@@ -264,8 +264,8 @@ static int get_int(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1: return (int)va_arg(args, char);
-	case 2: return (int)va_arg(args, short);
+	case 1: return (int)va_arg(args, int);
+	case 2: return (int)va_arg(args, int);
 	case 4: return (int)va_arg(args, int);
 	case 8: return (int)va_arg(args, long long);
 	}
@@ -283,8 +283,8 @@ static long long get_long(size_t size, va_list args)
 {
 	switch (size) {
 	case 0:
-	case 1: return (long long)va_arg(args, char);
-	case 2: return (long long)va_arg(args, short);
+	case 1: return (long long)va_arg(args, int);
+	case 2: return (long long)va_arg(args, int);
 	case 4: return (long long)va_arg(args, int);
 	case 8: return (long long)va_arg(args, long long);
 	}
@@ -310,7 +310,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 	switch (act_size) {
 	case 0: {
-		char a = va_arg(args, char);
+		char a = va_arg(args, int);
 		char b = get_char(exp_size, args);
 #if defined(T_WIN)
 		wprintf_s(L"       %c %hs %c       ", a ? '1' : '0', cond, b ? '1' : '0');
@@ -320,8 +320,8 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		break;
 	}
 	case 1: {
-		unsigned char a = va_arg(args, unsigned char);
-		unsigned char b = va_arg(args, unsigned char);
+		unsigned char a = va_arg(args, int);
+		unsigned char b = va_arg(args, int);
 #if defined(T_WIN)
 		wprintf_s(BYTE_TO_BIN_PATTERN L" %hs " BYTE_TO_BIN_PATTERN, BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b));
 #else
@@ -330,7 +330,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		break;
 	}
 	case 2: {
-		short a = (short)va_arg(args, short);
+		short a = (short)va_arg(args, int);
 		short b = get_short(exp_size, args);
 #if defined(T_WIN)
 		wprintf_s(L"%08X %hs %08X", a, cond, b);
