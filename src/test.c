@@ -233,9 +233,9 @@ static char get_char(size_t size, va_list args)
 	}
 
 #if defined(T_WIN)
-	wprintf_s(L"Unsupported type of size: %zd\n", size);
+	wprintf_s(L"Unsupported type of size: %zu\n", size);
 #else
-	printf("Unsupported type of size: %zd\n", size);
+	printf("Unsupported type of size: %zu\n", size);
 #endif
 	assert(0);
 	return 0;
@@ -252,9 +252,9 @@ static short get_short(size_t size, va_list args)
 	}
 
 #if defined(T_WIN)
-	wprintf_s(L"Unsupported type of size: %zd\n", size);
+	wprintf_s(L"Unsupported type of size: %zu\n", size);
 #else
-	printf("Unsupported type of size: %zd\n", size);
+	printf("Unsupported type of size: %zu\n", size);
 #endif
 	assert(0);
 	return 0;
@@ -271,9 +271,9 @@ static int get_int(size_t size, va_list args)
 	}
 
 #if defined(T_WIN)
-	wprintf_s(L"Unsupported type of size: %zd\n", size);
+	wprintf_s(L"Unsupported type of size: %zu\n", size);
 #else
-	printf("Unsupported type of size: %zd\n", size);
+	printf("Unsupported type of size: %zu\n", size);
 #endif
 	assert(0);
 	return 0;
@@ -290,9 +290,9 @@ static long long get_long(size_t size, va_list args)
 	}
 
 #if defined(T_WIN)
-	wprintf_s(L"Unsupported type: %zd\n", size);
+	wprintf_s(L"Unsupported type: %zu\n", size);
 #else
-	printf("Unsupported type: %zd\n", size);
+	printf("Unsupported type: %zu\n", size);
 #endif
 	assert(0);
 	return 0;
@@ -361,9 +361,9 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 	}
 	default:
 #if defined(T_WIN)
-		wprintf_s(L"Unsupported type: %zd\n", act_size);
+		wprintf_s(L"Unsupported type: %zu\n", act_size);
 #else
-		printf("Unsupported type: %zd\n", act_size);
+		printf("Unsupported type: %zu\n", act_size);
 #endif
 		assert(0);
 	}
