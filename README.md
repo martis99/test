@@ -1,9 +1,12 @@
 # test
-A simple testing library for C.
+cross-platform testing library for C
 
 ![image](https://user-images.githubusercontent.com/61162271/229194843-f41ace2c-17a8-44b0-b6bb-86c8fbd636b0.png)
 
+***
+
 ## Usage
+
 ### Single test
 ```C
 #include "test.h"
