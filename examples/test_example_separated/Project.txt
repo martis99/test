@@ -1,0 +1,5 @@
+NAME: test_example_separated
+TYPE: EXE
+SOURCE: src
+DEPENDS: test
+INCLUDES: test

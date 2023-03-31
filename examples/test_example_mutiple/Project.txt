@@ -1,0 +1,5 @@
+NAME: test_example_mutiple
+TYPE: EXE
+SOURCE: src
+DEPENDS: test
+INCLUDES: test

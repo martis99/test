@@ -108,7 +108,7 @@ TEST(parent_test)
 	SEND;
 }
 
-TEST(test)
+TEST(tests)
 {
 	SSTART;
 	RUN(success_test);
@@ -120,6 +120,6 @@ TEST(test)
 int main(int argc, char **argv)
 {
 	t_init(80);
-	test();
+	tests();
 	t_finish();
 }

@@ -26,11 +26,7 @@ TEST(success_test)
 TEST(fail_test)
 {
 	START;
-
-	unsigned int u = 0;
-
 	EXPECT_EQ(1, 2);
-
 	END;
 }
 
@@ -59,7 +55,7 @@ TEST(parent_test)
 	SEND;
 }
 
-TEST(test)
+TEST(tests)
 {
 	SSTART;
 	RUN(parent_test);
@@ -69,6 +65,6 @@ TEST(test)
 int main(int argc, char **argv)
 {
 	t_init(80);
-	test();
+	tests();
 	t_finish();
 }
