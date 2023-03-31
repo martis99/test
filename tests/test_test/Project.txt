@@ -1,0 +1,5 @@
+NAME: test_test
+TYPE: EXE
+SOURCE: src
+DEPENDS: test
+INCLUDES: test
