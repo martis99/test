@@ -11,24 +11,28 @@ test - simple testing library for C.
 TEST(test)
 {
 	START;
-	EXPECT_EQ(4 + 5, 9);
+	EXPECT_EQ(4 + 4, 9);
 	END;
+}
+
+TEST(tests)
+{
+	SSTART;
+	RUN(test);
+	SEND;
 }
 
 int main(int argc, char **argv)
 {
-	t_init(2);
-	SSTART;
-	RUN(test);
-	SEND;
-	t_free();
+	t_init(80);
+	tests();
+	t_finish();
 }
 ```
 #### Passed
-![image](https://user-images.githubusercontent.com/61162271/212423027-eb884f46-60f5-4778-97a5-b96fc8deff60.png)
+![image](https://user-images.githubusercontent.com/61162271/229192699-9a06edc1-a115-45cc-9697-31d54d2a444a.png)
 #### Failed
-![image](https://user-images.githubusercontent.com/61162271/212423244-5ecb1f53-22f1-4530-9a6c-4ce54f78f2db.png)
-
+![image](https://user-images.githubusercontent.com/61162271/229192843-00fe4306-86c7-4762-ba3a-9e6519787afe.png)
 ### Multiple tests
 ```C
 #include "test.h"
@@ -69,9 +73,9 @@ int main(int argc, char **argv)
 }
 ```
 #### Passed
-![image](https://user-images.githubusercontent.com/61162271/212424188-e3a3810f-18ec-4521-91c2-8d7dee169da2.png)
+![image](https://user-images.githubusercontent.com/61162271/229193424-f606da5e-ca18-4f6b-b562-9c4d6e54c235.png)
 #### Failed
-![image](https://user-images.githubusercontent.com/61162271/212424400-a80e28e1-4927-4b76-9523-79575d9f5dc6.png)
+![image](https://user-images.githubusercontent.com/61162271/229193785-41650229-cfcf-4beb-ac43-85e089e810ad.png)
 
 ### Parameterized Tests
 ```C
@@ -84,15 +88,20 @@ TEST(test, int a, int b, int c)
 	END;
 }
 
-int main(int argc, char **argv)
+TEST(tests)
 {
-	t_init(2);
 	SSTART;
 	RUN(test, 4, 5, 9);
 	RUN(test, 1, 2, 3);
 	RUN(test, 2, 4, 6);
 	SEND;
-	t_free();
+}
+
+int main(int argc, char **argv)
+{
+	t_init(80);
+	tests();
+	t_finish();
 }
 ```
 
@@ -143,16 +152,21 @@ TEST(parent)
 	SEND;
 }
 
-int main(int argc, char **argv)
+TEST(tests)
 {
-	t_init(4);
 	SSTART;
 	RUN(parent);
 	SEND;
-	t_free();
+}
+
+int main(int argc, char **argv)
+{
+	t_init(80);
+	tests();
+	t_finish();
 }
 ```
-![image](https://user-images.githubusercontent.com/61162271/212425987-aa94cb4a-83c2-4cbf-b660-3dfad31a2dc9.png)
+![image](https://user-images.githubusercontent.com/61162271/229194843-f41ace2c-17a8-44b0-b6bb-86c8fbd636b0.png)
 
 ### Tests in multiple files
 child1.h
@@ -165,11 +179,12 @@ child1.h
 STEST(child1);
 
 #endif
-
 ```
 child1.c
 ```C
 #include "child1.h"
+
+#include "test.h"
 
 TEST(grand_child1, int a, int b)
 {
@@ -191,6 +206,7 @@ STEST(child1)
 main.c
 ```C
 #include "child1.h"
+
 #include "test.h"
 
 TEST(grand_child2, int a, int b)
@@ -219,13 +235,18 @@ TEST(parent)
 	SEND;
 }
 
-int main(int argc, char **argv)
+TEST(tests)
 {
-	t_init(4);
 	SSTART;
 	RUN(parent);
 	SEND;
-	t_free();
+}
+
+int main(int argc, char **argv)
+{
+	t_init(80);
+	tests();
+	t_finish();
 }
 ```
 ### Setup & Teardown
@@ -255,7 +276,7 @@ TEST(test, int v)
 	END;
 }
 
-static void run_tests()
+TEST(tests)
 {
 	SSTART;
 	RUN(test, 5);
@@ -270,9 +291,8 @@ int main(int argc, char **argv)
 	t_setup(setup);
 	t_teardown(teardown);
 
-	t_init(4);
-	run_tests();
-	t_results();
-	t_free();
+	t_init(80);
+	tests();
+	t_finish();
 }
 ```
