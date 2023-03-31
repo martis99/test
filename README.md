@@ -296,3 +296,11 @@ int main(int argc, char **argv)
 	t_finish();
 }
 ```
+
+## Build
+
+1. Clone repository:
+```
+git clone https://github.com/martis99/test.git
+```
+2. Refer to [build usage](https://github.com/martis99/build#usage).
