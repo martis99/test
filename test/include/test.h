@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 void t_init(int width);
-void t_finish();
+int t_finish();
 
 typedef int (*setup_fn)(void *priv);
 typedef int (*teardown_fn)(void *priv);

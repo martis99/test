@@ -127,13 +127,14 @@ void t_init(int width)
 	s_data.depth  = -1;
 }
 
-void t_finish()
+int t_finish()
 {
 	if (s_data.failed == 0) {
 		printf("\033[0;32mPASSED %llu %s\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
 	} else {
 		printf("\033[0;31mFAILED %llu/%llu %s\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
 	}
+	return (int)s_data.failed;
 }
 
 void t_start()
@@ -312,12 +313,26 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 	exp_lcol = MAX(exp_lcol, 0);
 	exp_rcol = MAX(exp_rcol, 0);
 
-	const int act_llval = (int)strlen(act);
-	const int act_lrval = (int)strlen(exp);
+	const int llen = (int)strlen(act);
+	const int rlen = (int)strlen(exp);
 
-	const int act_lcol = MAX(act_llval + 4 + act_lrval, exp_lcol);
+	int act_llval = MAX(llen, exp_llval);
+	int act_lrval = MAX(rlen, exp_lrval);
 
-	printf("\033[0;31m%*s %s %-*s ", exp_llval, act, cond, exp_lrval, exp);
+	const int act_llen = MAX(act_llval + 4 + act_lrval, exp_lcol);
+
+	act_llval = act_llen > exp_lcol ? llen : exp_llval;
+	act_lrval = act_llen > exp_lcol ? rlen : exp_lrval;
+
+	int act_lcol = act_llval + 4 + act_lrval;
+
+	const int missing = MAX(exp_lcol - act_lcol, 0);
+
+	act_lcol += missing;
+
+	printf("\033[0;31m%*s %s %-*s ", act_llval, act, cond, act_lrval + missing, exp);
+
+	int lover = MAX(act_lcol - exp_lcol, 0);
 
 	int act_width = 0;
 
@@ -328,7 +343,13 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 		act_width = MAX(act_lcol + 1 + (1 + 4 + 1), exp_width);
 
-		printf("%*s %s %-*s", exp_rlval, a ? "1" : "0", cond, exp_rrval, b ? "1" : "0");
+		const int pl = MAX(exp_rlval - 1, 0);
+		const int l  = MAX(pl - lover, 0);
+
+		lover -= pl - l;
+
+		const int r = MAX(exp_rrval - 1 - lover, 0);
+		printf("%*s%c %s %c%-*s", l, "", a ? '1' : '0', cond, b ? '1' : '0', r, "");
 		break;
 	}
 	case 1: {
@@ -337,8 +358,12 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 		act_width = MAX(act_lcol + 1 + (8 + 4 + 8), exp_width);
 
-		const int l = MAX(exp_rlval - 8, 0);
-		const int r = MAX(exp_rrval - 8, 0);
+		const int pl = MAX(exp_rlval - 8, 0);
+		const int l  = MAX(pl - lover, 0);
+
+		lover -= pl - l;
+
+		const int r = MAX(exp_rrval - 8 - lover, 0);
 		printf("%*s" BYTE_TO_BIN_PATTERN " %s " BYTE_TO_BIN_PATTERN "%*s", l, "", BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b), r, "");
 		break;
 	}
@@ -348,8 +373,12 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 		act_width = MAX(act_lcol + 1 + (8 + 4 + 8), exp_width);
 
-		const int l = MAX(exp_rlval - 8, 0);
-		const int r = MAX(exp_rrval - 8, 0);
+		const int pl = MAX(exp_rlval - 8, 0);
+		const int l  = MAX(pl - lover, 0);
+
+		lover -= pl - l;
+
+		const int r = MAX(exp_rrval - 8 - lover, 0);
 		printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
 		break;
 	}
@@ -359,8 +388,12 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 		act_width = MAX(act_lcol + 1 + (8 + 4 + 8), exp_width);
 
-		const int l = MAX(exp_rlval - 8, 0);
-		const int r = MAX(exp_rrval - 8, 0);
+		const int pl = MAX(exp_rlval - 8, 0);
+		const int l  = MAX(pl - lover, 0);
+
+		lover -= pl - l;
+
+		const int r = MAX(exp_rrval - 8 - lover, 0);
 		printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
 		break;
 	}
@@ -370,8 +403,12 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 		act_width = MAX(act_lcol + 1 + (16 + 4 + 16), exp_width);
 
-		const int l = MAX(exp_rlval - 16, 0);
-		const int r = MAX(exp_rrval - 16, 0);
+		const int pl = MAX(exp_rlval - 16, 0);
+		const int l  = MAX(pl - lover, 0);
+
+		lover -= pl - l;
+
+		const int r = MAX(exp_rrval - 16 - lover, 0);
 		printf("%*s%p %s %p%*s", l, "", (void *)a, cond, (void *)b, r, "");
 		break;
 	}
