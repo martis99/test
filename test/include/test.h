@@ -22,6 +22,8 @@ void t_sstart(const char *func);
 int t_send(int passed, int failed);
 
 int t_scan(const char *str, const char *fmt, ...);
+int t_strcmp(const char *act, const char *exp);
+int t_strncmp(const char *act, const char *exp, size_t len);
 
 void t_expect_ch(int passed, const char *func, int line, const char *check);
 
@@ -30,8 +32,10 @@ void t_expect_m(int passed, const char *func, int line, const char *act, size_t 
 
 void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...);
 
-void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...);
+void t_expect_str(int passed, const char *func, int line, const char *act, const char *exp);
+void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len);
 
+void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...);
 
 //Declare test
 #define TEST(_name, ...) static inline int _name(__VA_ARGS__)
@@ -157,6 +161,22 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 			t_expect_fmt(_passed, __func__, __LINE__, _str, _cnt, __VA_ARGS__); \
 			_passed = 0;                                                        \
 		}                                                                           \
+	} while (0)
+
+#define EXPECT_STR(_actual, _expected)                                                 \
+	do {                                                                           \
+		if (t_strcmp(_actual, _expected) != 0) {                               \
+			t_expect_str(_passed, __func__, __LINE__, _actual, _expected); \
+			_passed = 0;                                                   \
+		}                                                                      \
+	} while (0)
+
+#define EXPECT_STRN(_actual, _expected, _len)                                                 \
+	do {                                                                                  \
+		if (t_strncmp(_actual, _expected, _len) != 0) {                               \
+			t_expect_strn(_passed, __func__, __LINE__, _actual, _expected, _len); \
+			_passed = 0;                                                          \
+		}                                                                             \
 	} while (0)
 
 #define EXPECT_FAIL(_fmt, ...)                                                 \

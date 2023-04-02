@@ -25,6 +25,8 @@ TEST(success_test)
 	EXPECT_EQM(0b00000011, 0b00001010, 0b00000010);
 	EXPECT_NEM(0b00000011, 0b00001010, 0b00001011);
 	EXPECT_FMT("123", 1, "%3u", &u);
+	EXPECT_STR("a", "a");
+	EXPECT_STRN("ab", "ac", 1);
 	EXPECT(!strcmp("a", "a"));
 	END;
 }
@@ -62,6 +64,9 @@ TEST(fail_test)
 	EXPECT_FMT("aaa", 1, "%3u", &u);
 	EXPECT_FMT("aaaa", 1, "%3u", &u);
 	EXPECT_FMT("aaaaaaaaa", 1, "%3u", &u);
+
+	EXPECT_STR("a", "b");
+	EXPECT_STRN("ab", "bc", 1);
 
 	EXPECT_FAIL("");
 	EXPECT_FAIL("-------------------------------------Column-------------------------------------");
@@ -108,6 +113,20 @@ TEST(fail_test)
 	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaa", 1, "bbbbbbbbbbbbbbbbbbbbbbb", &u);
 	EXPECT_FMT("", 1, "bbbbbbbbbbbbbbbbbbbbbbb", &u);
 	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaa", 1, "", &u);
+
+	EXPECT_FAIL("");
+	EXPECT_FAIL("-----------------------------------EXPECT_STR-----------------------------------");
+
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbb");
+	EXPECT_STR("", "bbbbbbbbbbbbbbbbbbbbbbb");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaa", "");
+
+	EXPECT_FAIL("");
+	EXPECT_FAIL("-----------------------------------EXPECT_STRN-----------------------------------");
+
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaac", "bbbbbbbbbbbbbbbbbbbbbbbc", 23);
+	EXPECT_STRN("", "bbbbbbbbbbbbbbbbbbbbbbbc", 23);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaac", "", 23);
 
 	EXPECT_FAIL("");
 	EXPECT_FAIL("-------------------------------------EXPECT-------------------------------------");
@@ -337,6 +356,26 @@ TEST(fail_test)
 	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
 	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
 	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
+
+	EXPECT_FAIL("");
+	EXPECT_FAIL("-----------------------------------EXPECT_STR-----------------------------------");
+
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+	EXPECT_FAIL("");
+	EXPECT_FAIL("-----------------------------------EXPECT_STRN----------------------------------");
+
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 77);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 77);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 83);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 83);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 89);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 89);
 
 	EXPECT_FAIL("");
 	EXPECT_FAIL("-----------------------------------EXPECT_FAIL----------------------------------");

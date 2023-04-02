@@ -209,6 +209,16 @@ int t_scan(const char *str, const char *fmt, ...)
 	return ret;
 }
 
+int t_strcmp(const char *act, const char *exp)
+{
+	return strcmp(act, exp);
+}
+
+int t_strncmp(const char *act, const char *exp, size_t len)
+{
+	return strncmp(act, exp, len);
+}
+
 static int print_header(int passed, const char *func)
 {
 	t_sprint();
@@ -293,6 +303,7 @@ static long long get_long(size_t size, va_list args)
 	return 0;
 }
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 static void print_values(int passed, const char *func, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, int inc, va_list args)
@@ -470,20 +481,12 @@ void t_expect_m(int passed, const char *func, int line, const char *act, size_t 
 	printf(" " BYTE_TO_BIN_PATTERN " L%d\033[0m\n", BYTE_TO_BIN(mask), line);
 }
 
-void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...)
+static void print_str(int passed, const char *func, int line, const char *act, const char *exp, const char *cond, int llen, int rlen)
 {
-	va_list args;
-	va_start(args, cnt);
-	const char *exp = va_arg(args, const char *);
-	va_end(args);
-
 	const int exp_width = s_data.width - print_header(passed, func);
 
 	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
 	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
-
-	const int llen = (int)strlen(act);
-	const int rlen = (int)strlen(exp);
 
 	const int len	  = MAX(llen, rlen) * 2 + 4;
 	const int act_col = llen + 4 + rlen;
@@ -507,7 +510,26 @@ void t_expect_fmt(int passed, const char *func, int line, const char *act, unsig
 	const int over = MAX(act_width - exp_width, 0);
 	const int add  = MAX(9 - over, 0);
 
-	printf("\033[0;31m%*s ~= %-*s%*s L%d\033[0m\n", act_lval, act, act_rval, exp, a + add, "", line);
+	printf("\033[0;31m%*s %s %-*s%*s L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
+}
+
+void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...)
+{
+	va_list args;
+	va_start(args, cnt);
+	const char *exp = va_arg(args, const char *);
+	va_end(args);
+
+	print_str(passed, func, line, act, exp, "~=", (int)strlen(act), (int)strlen(exp));
+}
+
+void t_expect_str(int passed, const char *func, int line, const char *act, const char *exp)
+{
+	print_str(passed, func, line, act, exp, "==", (int)strlen(act), (int)strlen(exp));
+}
+void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len)
+{
+	print_str(passed, func, line, act, exp, "==", (int)MIN(len, strlen(act)), (int)MIN(len, strlen(exp)));
 }
 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
