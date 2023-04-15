@@ -30,7 +30,7 @@ TEST(fail_test)
 	END;
 }
 
-TEST(parameterized_test, a, b)
+TEST(parameterized_test, int a, int b)
 {
 	START;
 	EXPECT_EQ(a, b);
