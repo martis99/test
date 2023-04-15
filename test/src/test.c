@@ -231,7 +231,7 @@ static int print_header(int passed, const char *func)
 #if defined(T_WIN)
 		wprintf_s(L"\033[0;31m%-*hs          FAILED\033[0m\n", s_data.width - len, func);
 #else
-		printf("\033[0;31m%-*hs          FAILED\033[0m\n", s_data.width - len, func);
+		printf("\033[0;31m%-*s          FAILED\033[0m\n", s_data.width - len, func);
 #endif
 	}
 	int len = 0;
