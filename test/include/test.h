@@ -45,8 +45,11 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 	int _passed = 1; \
 	t_start()
 
+//Test result
+#define RES t_end(_passed, __func__)
+
 //Test end
-#define END return t_end(_passed, __func__)
+#define END return RES
 
 //Subtests start
 #define SSTART           \
