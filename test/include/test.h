@@ -2,6 +2,7 @@
 #define TEST_H
 
 #include <stddef.h>
+#include <wchar.h>
 
 void t_init(int width);
 int t_finish();
@@ -25,6 +26,9 @@ int t_scan(const char *str, const char *fmt, ...);
 int t_strcmp(const char *act, const char *exp);
 int t_strncmp(const char *act, const char *exp, size_t len);
 
+int t_wstrcmp(const wchar_t *act, const wchar_t *exp);
+int t_wstrncmp(const wchar_t *act, const wchar_t *exp, size_t len);
+
 void t_expect_ch(int passed, const char *func, int line, const char *check);
 
 void t_expect_g(int passed, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, ...);
@@ -34,6 +38,9 @@ void t_expect_fmt(int passed, const char *func, int line, const char *act, unsig
 
 void t_expect_str(int passed, const char *func, int line, const char *act, const char *exp);
 void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len);
+
+void t_expect_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp);
+void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len);
 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...);
 
@@ -180,6 +187,22 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 			t_expect_strn(_passed, __func__, __LINE__, _actual, _expected, _len); \
 			_passed = 0;                                                          \
 		}                                                                             \
+	} while (0)
+
+#define EXPECT_WSTR(_actual, _expected)                                                 \
+	do {                                                                            \
+		if (t_wstrcmp(_actual, _expected) != 0) {                               \
+			t_expect_wstr(_passed, __func__, __LINE__, _actual, _expected); \
+			_passed = 0;                                                    \
+		}                                                                       \
+	} while (0)
+
+#define EXPECT_WSTRN(_actual, _expected, _len)                                                 \
+	do {                                                                                   \
+		if (t_wstrncmp(_actual, _expected, _len) != 0) {                               \
+			t_expect_wstrn(_passed, __func__, __LINE__, _actual, _expected, _len); \
+			_passed = 0;                                                           \
+		}                                                                              \
 	} while (0)
 
 #define EXPECT_FAIL(_fmt, ...)                                                 \

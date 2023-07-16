@@ -211,12 +211,46 @@ int t_scan(const char *str, const char *fmt, ...)
 
 int t_strcmp(const char *act, const char *exp)
 {
+	if (act == NULL && exp == NULL) {
+		return 0;
+	}
+	if (act == NULL || exp == NULL) {
+		return 1;
+	}
 	return strcmp(act, exp);
 }
 
 int t_strncmp(const char *act, const char *exp, size_t len)
 {
+	if (act == NULL && exp == NULL) {
+		return 0;
+	}
+	if (act == NULL || exp == NULL) {
+		return 1;
+	}
 	return strncmp(act, exp, len);
+}
+
+int t_wstrcmp(const wchar_t *act, const wchar_t *exp)
+{
+	if (act == NULL && exp == NULL) {
+		return 0;
+	}
+	if (act == NULL || exp == NULL) {
+		return 1;
+	}
+	return wcscmp(act, exp);
+}
+
+int t_wstrncmp(const wchar_t *act, const wchar_t *exp, size_t len)
+{
+	if (act == NULL && exp == NULL) {
+		return 0;
+	}
+	if (act == NULL || exp == NULL) {
+		return 1;
+	}
+	return wcsncmp(act, exp, len);
 }
 
 static int print_header(int passed, const char *func)
@@ -513,6 +547,38 @@ static void print_str(int passed, const char *func, int line, const char *act, c
 	printf("\033[0;31m%*s %s %-*s%*s L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
 }
 
+static void print_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, const char *cond, int llen, int rlen)
+{
+	const int exp_width = s_data.width - print_header(passed, func);
+
+	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
+	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
+
+	const int len	  = MAX(llen, rlen) * 2 + 4;
+	const int act_col = llen + 4 + rlen;
+
+	const int width = len < exp_lcol ? exp_lcol : exp_width;
+	const int a	= len < exp_lcol ? MAX(exp_rcol + 1, 0) : 0;
+
+	const int exp_lval = MAX((width - 4) / 2, 0);
+	const int exp_rval = MAX((width - 4 - 1) / 2 + 1, 0);
+
+	int act_lval = MAX(llen, exp_lval);
+	int act_rval = MAX(rlen, exp_rval);
+
+	int act_width = len < exp_lcol ? exp_width : act_lval + 4 + act_rval;
+
+	act_lval = act_width > exp_width ? llen : act_lval;
+	act_rval = act_width > exp_width ? rlen : act_rval;
+
+	act_width = len < exp_lcol ? exp_width : act_lval + 4 + act_rval;
+
+	const int over = MAX(act_width - exp_width, 0);
+	const int add  = MAX(9 - over, 0);
+
+	wprintf(L"\033[0;31m%*s %hs %-*s%*hs L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
+}
+
 void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...)
 {
 	va_list args;
@@ -525,11 +591,20 @@ void t_expect_fmt(int passed, const char *func, int line, const char *act, unsig
 
 void t_expect_str(int passed, const char *func, int line, const char *act, const char *exp)
 {
-	print_str(passed, func, line, act, exp, "==", (int)strlen(act), (int)strlen(exp));
+	print_str(passed, func, line, act, exp, "==", act == NULL ? 0 : (int)strlen(act), exp == NULL ? 0 : (int)strlen(exp));
 }
 void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len)
 {
-	print_str(passed, func, line, act, exp, "==", (int)MIN(len, strlen(act)), (int)MIN(len, strlen(exp)));
+	print_str(passed, func, line, act, exp, "==", (int)MIN(len, act == NULL ? 0 : strlen(act)), (int)MIN(len, exp == NULL ? 0 : strlen(exp)));
+}
+
+void t_expect_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp)
+{
+	print_wstr(passed, func, line, act, exp, "==", act == NULL ? 0 : (int)wcslen(act), exp == NULL ? 0 : (int)wcslen(exp));
+}
+void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len)
+{
+	print_wstr(passed, func, line, act, exp, "==", (int)MIN(len, act == NULL ? 0 : wcslen(act)), (int)MIN(len, exp == NULL ? 0 : wcslen(exp)));
 }
 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
