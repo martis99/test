@@ -93,7 +93,7 @@ static inline void t_eprint()
 static inline int pur()
 {
 #if defined(T_WIN)
-	return wprintf_s(L"└─");
+	return printf_s("  ");
 #else
 	return printf("└─");
 #endif
@@ -102,7 +102,7 @@ static inline int pur()
 static inline int pv()
 {
 #if defined(T_WIN)
-	return wprintf_s(L"│ ");
+	return printf_s("  ");
 #else
 	return printf("│ ");
 #endif
@@ -111,7 +111,7 @@ static inline int pv()
 static inline int pvr()
 {
 #if defined(T_WIN)
-	return wprintf_s(L"├─");
+	return printf_s("  ");
 #else
 	return printf("├─");
 #endif
