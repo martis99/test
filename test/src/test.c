@@ -86,7 +86,7 @@ static inline void t_sprint()
 static inline void t_eprint()
 {
 #if defined(T_WIN)
-	int r = _setmode(_fileno(stdout), _O_U8TEXT);
+	int r = _setmode(_fileno(stdout), _O_TEXT);
 #endif
 }
 
