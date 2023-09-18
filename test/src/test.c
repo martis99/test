@@ -76,17 +76,21 @@ void *t_get_priv()
 	return s_priv;
 }
 
+#if defined(T_WIN)
+static int s_r;
+#endif
+
 static inline void t_sprint()
 {
 #if defined(T_WIN)
-	int r = _setmode(_fileno(stdout), _O_U16TEXT);
+	s_r = _setmode(_fileno(stdout), _O_U16TEXT);
 #endif
 }
 
 static inline void t_eprint()
 {
 #if defined(T_WIN)
-	int r = _setmode(_fileno(stdout), _O_TEXT);
+	int r = _setmode(_fileno(stdout), s_r);
 #endif
 }
 
