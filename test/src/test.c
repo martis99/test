@@ -79,6 +79,7 @@ void *t_get_priv()
 static inline void t_sprint()
 {
 #if defined(T_WIN)
+	fflush(stdout);
 	int r = _setmode(_fileno(stdout), _O_WTEXT);
 #endif
 }
@@ -87,6 +88,7 @@ static inline void t_eprint()
 {
 #if defined(T_WIN)
 	int r = _setmode(_fileno(stdout), _O_TEXT);
+	fflush(stdout);
 #endif
 }
 
@@ -191,7 +193,9 @@ void t_sstart(const char *func)
 
 int t_send(int passed, int failed)
 {
+	printf("t_send_0\n");
 	t_sprint();
+	wprintf_s(L"t_send_1\n");
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
 	}
