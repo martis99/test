@@ -59,23 +59,23 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 #define END return RES
 
 //Subtests start
-#define SSTART           \
-	int _passed = 0; \
-	int _failed = 0; \
+#define SSTART            \
+	int _spassed = 0; \
+	int _sfailed = 0; \
 	t_sstart(__func__)
 
 //Run test
 #define RUN(_fn, ...)                   \
 	do {                            \
 		if (_fn(__VA_ARGS__)) { \
-			_failed++;      \
+			_sfailed++;     \
 		} else {                \
-			_passed++;      \
+			_spassed++;     \
 		}                       \
 	} while (0)
 
 //Subtests end
-#define SEND return t_send(_passed, _failed)
+#define SEND return t_send(_spassed, _sfailed)
 
 #define EXPECT(_check)                                                     \
 	do {                                                               \
