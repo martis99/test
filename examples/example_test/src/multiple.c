@@ -33,7 +33,7 @@ TEST(tests)
 	SEND;
 }
 
-int main(int argc, char **argv)
+int multiple()
 {
 	t_init(80);
 	tests();

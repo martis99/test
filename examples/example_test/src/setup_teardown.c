@@ -30,7 +30,7 @@ TEST(tests)
 	SEND;
 }
 
-int main(int argc, char **argv)
+int setup_teardown()
 {
 	int a;
 	t_set_priv(&a);

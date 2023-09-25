@@ -14,7 +14,7 @@ TEST(tests)
 	SEND;
 }
 
-int main(int argc, char **argv)
+int single()
 {
 	t_init(80);
 	tests();

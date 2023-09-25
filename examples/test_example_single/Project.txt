@@ -1,5 +1,0 @@
-NAME: test_example_single
-TYPE: EXE
-SOURCE: src
-DEPENDS: test
-INCLUDES: test

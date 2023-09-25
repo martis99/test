@@ -1,6 +1,9 @@
 #include "test.h"
 
+#include <stdio.h>
 #include <string.h>
+
+#define SEP "\n------%s------\n\n"
 
 TEST(success_test)
 {
@@ -62,9 +65,37 @@ TEST(tests)
 	SEND;
 }
 
+int single();
+int multiple();
+int parameterized();
+int multilevel();
+int separated();
+int setup_teardown();
+
 int main(int argc, char **argv)
 {
+	printf(SEP, "main");
 	t_init(80);
 	tests();
 	t_finish();
+
+	printf(SEP, "single");
+	single();
+
+	printf(SEP, "multiple");
+	multiple();
+
+	printf(SEP, "parameterized");
+	parameterized();
+
+	printf(SEP, "multilevel");
+	multilevel();
+
+	printf(SEP, "separated");
+	separated();
+
+	printf(SEP, "setup_teardown");
+	setup_teardown();
+
+	return 0;
 }

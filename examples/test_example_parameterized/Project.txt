@@ -1,5 +1,0 @@
-NAME: test_example_parameterized
-TYPE: EXE
-SOURCE: src
-DEPENDS: test
-INCLUDES: test

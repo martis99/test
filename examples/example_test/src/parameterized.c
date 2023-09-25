@@ -16,7 +16,7 @@ TEST(tests)
 	SEND;
 }
 
-int main(int argc, char **argv)
+int parameterized()
 {
 	t_init(80);
 	tests();

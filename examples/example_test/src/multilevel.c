@@ -50,7 +50,7 @@ TEST(tests)
 	SEND;
 }
 
-int main(int argc, char **argv)
+int multilevel()
 {
 	t_init(80);
 	tests();

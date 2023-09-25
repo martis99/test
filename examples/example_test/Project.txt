@@ -1,4 +1,4 @@
-NAME: test_example_setup_teardown
+NAME: example_test
 TYPE: EXE
 SOURCE: src
 DEPENDS: test
