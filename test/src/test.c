@@ -14,6 +14,7 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #if defined(T_WIN)
 	#include <io.h>
@@ -22,9 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #if defined(T_WIN)
-	#define printf	printf_s
 	#define vprintf vprintf_s
 	#define vsscanf vsscanf_s
 #endif
@@ -55,6 +56,59 @@ static struct tdata s_data;
 static void *s_priv;
 static setup_fn s_setup;
 static setup_fn s_teardown;
+
+static int t_printv(const char *fmt, va_list args)
+{
+	if (fmt == NULL) {
+		return 0;
+	}
+
+	va_list copy;
+	va_copy(copy, args);
+	int ret = vprintf(fmt, copy);
+	if (ret < 0 && errno == 0) {
+		freopen(NULL, "w", stdout);
+		ret = vprintf(fmt, copy);
+	}
+	va_end(copy);
+	return ret;
+}
+
+static int t_printf(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	int ret = t_printv(fmt, args);
+	va_end(args);
+	return ret;
+}
+
+static int t_wprintv(const wchar_t *fmt, va_list args)
+{
+	if (fmt == NULL) {
+		return 0;
+	}
+
+	va_list copy;
+	va_copy(copy, args);
+	errno	= 0;
+	int ret = vwprintf(fmt, copy);
+	if (ret < 0 && errno == 0) {
+		freopen(NULL, "w", stdout);
+		ret = vwprintf(fmt, copy);
+	}
+	va_end(copy);
+	return ret;
+}
+
+static int t_wprintf(const wchar_t *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	int ret = t_wprintv(fmt, args);
+	va_end(args);
+	return ret;
+}
 
 void t_set_priv(void *priv)
 {
@@ -95,27 +149,27 @@ static inline void t_eprint()
 static inline int pur()
 {
 #if defined(T_WIN)
-	return wprintf_s(L"└─");
+	return t_wprintf(L"└─");
 #else
-	return printf("└─");
+	return t_printf("└─");
 #endif
 }
 
 static inline int pv()
 {
 #if defined(T_WIN)
-	return wprintf_s(L"│ ");
+	return t_wprintf(L"│ ");
 #else
-	return printf("│ ");
+	return t_printf("│ ");
 #endif
 }
 
 static inline int pvr()
 {
 #if defined(T_WIN)
-	return wprintf_s(L"├─");
+	return t_wprintf(L"├─");
 #else
-	return printf("├─");
+	return t_printf("├─");
 #endif
 }
 
@@ -132,9 +186,9 @@ void t_init(int width)
 int t_finish()
 {
 	if (s_data.failed == 0) {
-		printf("\033[0;32mPASSED %llu %s\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
+		t_printf("\033[0;32mPASSED %llu %s\033[0m\n", s_data.passed, s_data.passed == 1 ? "TEST" : "TESTS");
 	} else {
-		printf("\033[0;31mFAILED %llu/%llu %s\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
+		t_printf("\033[0;31mFAILED %llu/%llu %s\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
 	}
 	return (int)s_data.failed;
 }
@@ -160,7 +214,7 @@ int t_end(int passed, const char *func)
 		len += pvr();
 		t_eprint();
 
-		printf("\033[0;32m%-*s          OK\033[0m\n", s_data.width - len, func);
+		t_printf("\033[0;32m%-*s          OK\033[0m\n", s_data.width - len, func);
 
 		s_data.passed++;
 		return 0;
@@ -181,7 +235,7 @@ void t_sstart(const char *func)
 	}
 	t_eprint();
 
-	printf("%s\n", func);
+	t_printf("%s\n", func);
 	s_data.depth++;
 }
 
@@ -194,9 +248,9 @@ int t_send(int passed, int failed)
 	pur();
 	t_eprint();
 	if (failed == 0) {
-		printf("\033[0;32mPASSED %d %s\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
+		t_printf("\033[0;32mPASSED %d %s\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
 	} else {
-		printf("\033[0;31mFAILED %d/%d %s\033[0m\n", failed, failed + passed, failed == 1 ? "TEST" : "TESTS");
+		t_printf("\033[0;31mFAILED %d/%d %s\033[0m\n", failed, failed + passed, failed == 1 ? "TEST" : "TESTS");
 	}
 	s_data.depth--;
 	return failed > 0;
@@ -265,9 +319,9 @@ static int print_header(int passed, const char *func)
 		}
 		len += pvr();
 #if defined(T_WIN)
-		wprintf_s(L"\033[0;31m%-*hs          FAILED\033[0m\n", s_data.width - len, func);
+		t_wprintf(L"\033[0;31m%-*hs          FAILED\033[0m\n", s_data.width - len, func);
 #else
-		printf("\033[0;31m%-*s          FAILED\033[0m\n", s_data.width - len, func);
+		t_printf("\033[0;31m%-*s          FAILED\033[0m\n", s_data.width - len, func);
 #endif
 	}
 	int len = 0;
@@ -289,7 +343,7 @@ static char get_char(size_t size, va_list args)
 	case 8: return (char)va_arg(args, long long);
 	}
 
-	printf("Unsupported type of size: %zu\n", size);
+	t_printf("Unsupported type of size: %zu\n", size);
 	assert(0);
 	return 0;
 }
@@ -304,7 +358,7 @@ static short get_short(size_t size, va_list args)
 	case 8: return (short)va_arg(args, long long);
 	}
 
-	printf("Unsupported type of size: %zu\n", size);
+	t_printf("Unsupported type of size: %zu\n", size);
 	assert(0);
 	return 0;
 }
@@ -319,7 +373,7 @@ static int get_int(size_t size, va_list args)
 	case 8: return (int)va_arg(args, long long);
 	}
 
-	printf("Unsupported type of size: %zu\n", size);
+	t_printf("Unsupported type of size: %zu\n", size);
 	assert(0);
 	return 0;
 }
@@ -334,7 +388,7 @@ static long long get_long(size_t size, va_list args)
 	case 8: return (long long)va_arg(args, long long);
 	}
 
-	printf("Unsupported type: %zu\n", size);
+	t_printf("Unsupported type: %zu\n", size);
 	assert(0);
 	return 0;
 }
@@ -377,7 +431,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 	act_lcol += missing;
 
-	printf("\033[0;31m%*s %s %-*s ", act_llval, act, cond, act_lrval + missing, exp);
+	t_printf("\033[0;31m%*s %s %-*s ", act_llval, act, cond, act_lrval + missing, exp);
 
 	int lover = MAX(act_lcol - exp_lcol, 0);
 
@@ -396,7 +450,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		lover -= pl - l;
 
 		const int r = MAX(exp_rrval - 1 - lover, 0);
-		printf("%*s%c %s %c%-*s", l, "", a ? '1' : '0', cond, b ? '1' : '0', r, "");
+		t_printf("%*s%c %s %c%-*s", l, "", a ? '1' : '0', cond, b ? '1' : '0', r, "");
 		break;
 	}
 	case 1: {
@@ -411,7 +465,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		lover -= pl - l;
 
 		const int r = MAX(exp_rrval - 8 - lover, 0);
-		printf("%*s" BYTE_TO_BIN_PATTERN " %s " BYTE_TO_BIN_PATTERN "%*s", l, "", BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b), r, "");
+		t_printf("%*s" BYTE_TO_BIN_PATTERN " %s " BYTE_TO_BIN_PATTERN "%*s", l, "", BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b), r, "");
 		break;
 	}
 	case 2: {
@@ -426,7 +480,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		lover -= pl - l;
 
 		const int r = MAX(exp_rrval - 8 - lover, 0);
-		printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
+		t_printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
 		break;
 	}
 	case 4: {
@@ -441,7 +495,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		lover -= pl - l;
 
 		const int r = MAX(exp_rrval - 8 - lover, 0);
-		printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
+		t_printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
 		break;
 	}
 	case 8: {
@@ -456,11 +510,11 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		lover -= pl - l;
 
 		const int r = MAX(exp_rrval - 16 - lover, 0);
-		printf("%*s%p %s %p%*s", l, "", (void *)a, cond, (void *)b, r, "");
+		t_printf("%*s%p %s %p%*s", l, "", (void *)a, cond, (void *)b, r, "");
 		break;
 	}
 	default:
-		printf("Unsupported type: %zu\n", act_size);
+		t_printf("Unsupported type: %zu\n", act_size);
 		assert(0);
 		break;
 	}
@@ -468,7 +522,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 	const int over = MAX(act_width - exp_width, 0);
 	const int add  = MAX(inc - over, 0);
 
-	printf("%*s", add, "");
+	t_printf("%*s", add, "");
 }
 
 void t_expect_ch(int passed, const char *func, int line, const char *check)
@@ -494,7 +548,7 @@ void t_expect_ch(int passed, const char *func, int line, const char *check)
 	const int over = MAX(act_width - exp_width, 0);
 	const int add  = MAX(9 - over, 0);
 
-	printf("\033[0;31m%*s%s%*s L%d\033[0m\n", l, "", check, r + a + add, "", line);
+	t_printf("\033[0;31m%*s%s%*s L%d\033[0m\n", l, "", check, r + a + add, "", line);
 }
 
 void t_expect_g(int passed, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, ...)
@@ -504,7 +558,7 @@ void t_expect_g(int passed, const char *func, int line, const char *act, size_t 
 	print_values(passed, func, act, act_size, exp, exp_size, cond, 9, args);
 	va_end(args);
 
-	printf(" L%d\033[0m\n", line);
+	t_printf(" L%d\033[0m\n", line);
 }
 
 void t_expect_m(int passed, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, unsigned char mask, ...)
@@ -514,7 +568,7 @@ void t_expect_m(int passed, const char *func, int line, const char *act, size_t 
 	print_values(passed, func, act, act_size, exp, exp_size, cond, 0, args);
 	va_end(args);
 
-	printf(" " BYTE_TO_BIN_PATTERN " L%d\033[0m\n", BYTE_TO_BIN(mask), line);
+	t_printf(" " BYTE_TO_BIN_PATTERN " L%d\033[0m\n", BYTE_TO_BIN(mask), line);
 }
 
 static void print_str(int passed, const char *func, int line, const char *act, const char *exp, const char *cond, int llen, int rlen)
@@ -546,7 +600,7 @@ static void print_str(int passed, const char *func, int line, const char *act, c
 	const int over = MAX(act_width - exp_width, 0);
 	const int add  = MAX(9 - over, 0);
 
-	printf("\033[0;31m%*s %s %-*s%*s L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
+	t_printf("\033[0;31m%*s %s %-*s%*s L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
 }
 
 static void print_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, const char *cond, int llen, int rlen)
@@ -578,7 +632,7 @@ static void print_wstr(int passed, const char *func, int line, const wchar_t *ac
 	const int over = MAX(act_width - exp_width, 0);
 	const int add  = MAX(9 - over, 0);
 
-	wprintf(L"\033[0;31m%*s %hs %-*s%*hs L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
+	t_wprintf(L"\033[0;31m%*s %hs %-*s%*hs L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
 }
 
 void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...)
@@ -616,9 +670,9 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 
-	printf("\033[0;31m");
-	len += vprintf(fmt, args);
-	printf("%*s L%d\033[0m\n", MAX(s_data.width - len + 9, 0), "", line);
+	t_printf("\033[0;31m");
+	len += t_printv(fmt, args);
+	t_printf("%*s L%d\033[0m\n", MAX(s_data.width - len + 9, 0), "", line);
 
 	va_end(args);
 }
