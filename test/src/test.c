@@ -57,17 +57,25 @@ static void *s_priv;
 static setup_fn s_setup;
 static setup_fn s_teardown;
 
+static FILE *t_freopen(const char *path, const char *mode, FILE *file)
+{
+	FILE *new_file = NULL;
+
+#if defined(T_WIN)
+	freopen_s(&file, path, mode, file);
+#else
+	file = freopen(path, mode, file);
+#endif
+	return file;
+}
+
 static int t_printv(const char *fmt, va_list args)
 {
-	if (fmt == NULL) {
-		return 0;
-	}
-
 	va_list copy;
 	va_copy(copy, args);
 	int ret = vprintf(fmt, copy);
 	if (ret < 0 && errno == 0) {
-		freopen(NULL, "w", stdout);
+		t_freopen(NULL, "w", stdout);
 		ret = vprintf(fmt, copy);
 	}
 	va_end(copy);
@@ -85,16 +93,12 @@ static int t_printf(const char *fmt, ...)
 
 static int t_wprintv(const wchar_t *fmt, va_list args)
 {
-	if (fmt == NULL) {
-		return 0;
-	}
-
 	va_list copy;
 	va_copy(copy, args);
 	errno	= 0;
 	int ret = vwprintf(fmt, copy);
 	if (ret < 0 && errno == 0) {
-		freopen(NULL, "w", stdout);
+		t_freopen(NULL, "w", stdout);
 		ret = vwprintf(fmt, copy);
 	}
 	va_end(copy);
