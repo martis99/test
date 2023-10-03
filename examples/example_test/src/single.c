@@ -14,7 +14,7 @@ TEST(tests)
 	SEND;
 }
 
-int single()
+void single()
 {
 	t_init(80);
 	tests();

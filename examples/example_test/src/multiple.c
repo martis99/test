@@ -33,7 +33,7 @@ TEST(tests)
 	SEND;
 }
 
-int multiple()
+void multiple()
 {
 	t_init(80);
 	tests();

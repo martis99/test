@@ -35,7 +35,7 @@ TEST(tests)
 	SEND;
 }
 
-int separated()
+void separated()
 {
 	t_init(80);
 	tests();

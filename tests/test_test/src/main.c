@@ -1,5 +1,7 @@
 #include "test.h"
 
+#include "type.h"
+
 #include <string.h>
 
 TEST(success_test)
@@ -25,8 +27,14 @@ TEST(success_test)
 	EXPECT_EQM(0b00000011, 0b00001010, 0b00000010);
 	EXPECT_NEM(0b00000011, 0b00001010, 0b00001011);
 	EXPECT_FMT("123", 1, "%3u", &u);
+	EXPECT_STR(NULL, NULL);
 	EXPECT_STR("a", "a");
+	EXPECT_STRN(NULL, NULL, 1);
 	EXPECT_STRN("ab", "ac", 1);
+	EXPECT_WSTR(NULL, NULL);
+	EXPECT_WSTR(L"a", L"a");
+	EXPECT_WSTRN(NULL, NULL, 1);
+	EXPECT_WSTRN(L"ab", L"ac", 1);
 	EXPECT(!strcmp("a", "a"));
 	END;
 }
@@ -65,68 +73,79 @@ TEST(fail_test)
 	EXPECT_FMT("aaaa", 1, "%3u", &u);
 	EXPECT_FMT("aaaaaaaaa", 1, "%3u", &u);
 
+	EXPECT_STR("", NULL);
 	EXPECT_STR("a", "b");
+	EXPECT_STRN("ab", NULL, 1);
 	EXPECT_STRN("ab", "bc", 1);
-
-	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "-------------------------------------Column-------------------------------------");
-
-	EXPECT_FAIL("%s", "------------------------------------EXPECT_EQ-----------------------------------");
-
-	EXPECT_EQ((char)0b0000000001, 0);
-	EXPECT_EQ(0, (char)0b0000000001);
-	EXPECT_EQ((short)0b000000001, 0);
-	EXPECT_EQ(0, (short)0b000000001);
-	EXPECT_EQ((int)0b00000000001, 0);
-	EXPECT_EQ(0, (int)0b00000000001);
-	EXPECT_EQ((long)0b0000000001, 0);
-	EXPECT_EQ(0, (long)0b0000000001);
-	EXPECT_EQ((long long)0b00001, 0);
-	EXPECT_EQ(0, (long long)0b00001);
-
-	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQM-----------------------------------");
-
-	EXPECT_EQM((char)0b0000000001, 0, 1);
-	EXPECT_EQM(0, (char)0b0000000001, 1);
-	EXPECT_EQM((short)0b000000001, 0, 1);
-	EXPECT_EQM(0, (short)0b000000001, 1);
-	EXPECT_EQM((int)0b00000000001, 0, 1);
-	EXPECT_EQM(0, (int)0b00000000001, 1);
-	EXPECT_EQM((long)0b0000000001, 0, 1);
-	EXPECT_EQM(0, (long)0b0000000001, 1);
-	EXPECT_EQM((long long)0b00001, 0, 1);
-	EXPECT_EQM(0, (long long)0b00001, 1);
+	EXPECT_WSTR(L"a", NULL);
+	EXPECT_WSTR(L"a", L"b");
+	EXPECT_WSTRN(L"ab", NULL, 1);
+	EXPECT_WSTRN(L"ab", L"bc", 1);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQB-----------------------------------");
 
-	struct {
-		unsigned char aaaaaaaaaaaaaaa : 1;
-	} c1 = { 0 };
+	EXPECT_EQB(0, 1);
+	EXPECT_EQB(1, 0);
 
-	EXPECT_EQB(c1.aaaaaaaaaaaaaaa, 1);
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "------------------------------------EXPECT_EQ-----------------------------------");
+
+	EXPECT_EQ(U8_MIN, U8_MAX);
+	EXPECT_EQ(U8_MIN, U16_MAX);
+	EXPECT_EQ(U8_MIN, U32_MAX);
+	EXPECT_EQ(U8_MIN, U64_MAX);
+	EXPECT_EQ(U8_MAX, U8_MIN);
+	EXPECT_EQ(U16_MIN, U8_MAX);
+	EXPECT_EQ(U16_MIN, U16_MAX);
+	EXPECT_EQ(U16_MIN, U32_MAX);
+	EXPECT_EQ(U16_MIN, U64_MAX);
+	EXPECT_EQ(U16_MAX, U16_MIN);
+
+	EXPECT_EQ(U32_MIN, U8_MAX);
+	EXPECT_EQ(U32_MIN, U16_MAX);
+	EXPECT_EQ(U32_MIN, U32_MAX);
+	EXPECT_EQ(U32_MIN, U64_MAX);
+	EXPECT_EQ(U32_MAX, U32_MIN);
+
+	EXPECT_EQ(U64_MIN, U8_MAX);
+	EXPECT_EQ(U64_MIN, U16_MAX);
+	EXPECT_EQ(U64_MIN, U32_MAX);
+	EXPECT_EQ(U64_MIN, U64_MAX);
+	EXPECT_EQ(U64_MAX, U64_MIN);
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQM-----------------------------------");
+
+	EXPECT_EQM(U8_MIN, U8_MAX, 1);
+	EXPECT_EQM(U8_MAX, U8_MIN, 1);
+	EXPECT_EQM(U16_MIN, U16_MAX, 1);
+	EXPECT_EQM(U16_MAX, U16_MIN, 1);
+	EXPECT_EQM(U32_MIN, U32_MAX, 1);
+	EXPECT_EQM(U32_MAX, U32_MIN, 1);
+	EXPECT_EQM(U64_MIN, U64_MAX, 1);
+	EXPECT_EQM(U64_MAX, U64_MIN, 1);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FMT-----------------------------------");
 
-	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaa", 1, "bbbbbbbbbbbbbbbbbbbbbbb", &u);
 	EXPECT_FMT("", 1, "bbbbbbbbbbbbbbbbbbbbbbb", &u);
 	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaa", 1, "", &u);
+	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaa", 1, "bbbbbbbbbbbbbbbbbbbbbbb", &u);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STR-----------------------------------");
 
-	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbb");
 	EXPECT_STR("", "bbbbbbbbbbbbbbbbbbbbbbb");
 	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaa", "");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbb");
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STRN-----------------------------------");
 
-	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaac", "bbbbbbbbbbbbbbbbbbbbbbbc", 23);
 	EXPECT_STRN("", "bbbbbbbbbbbbbbbbbbbbbbbc", 23);
 	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaac", "", 23);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaac", "bbbbbbbbbbbbbbbbbbbbbbbc", 23);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-------------------------------------EXPECT-------------------------------------");
@@ -141,217 +160,256 @@ TEST(fail_test)
 	EXPECT_FAIL("Fail %d", 1);
 
 	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "-------------------------------------Columns------------------------------------");
-
-	EXPECT_FAIL("%s", "------------------------------------EXPECT_EQ-----------------------------------");
-
-	EXPECT_FAIL("%s", "--------------------------------------char--------------------------------------");
-
-	EXPECT_EQ((char)0b000000000000000000000000000001, 0);
-	EXPECT_EQ((char)0, 0b000000000000000000000000000001);
-	EXPECT_EQ((char)0b00000000000000000000000000000000000001, 0);
-	EXPECT_EQ((char)0, 0b00000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "--------------------------------------short-------------------------------------");
-
-	EXPECT_EQ((short)0b00000000000000000000000000001, 0);
-	EXPECT_EQ((short)0, 0b00000000000000000000000000001);
-	EXPECT_EQ((short)0b0000000000000000000000000000000000001, 0);
-	EXPECT_EQ((short)0, 0b0000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "---------------------------------------int--------------------------------------");
-
-	EXPECT_EQ((int)0b0000000000000000000000000000001, 0);
-	EXPECT_EQ((int)0, 0b0000000000000000000000000000001);
-	EXPECT_EQ((int)0b000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((int)0, 0b000000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "--------------------------------------long--------------------------------------");
-
-	EXPECT_EQ((long)0b000000000000000000000000000001, 0);
-	EXPECT_EQ((long)0, 0b000000000000000000000000000001);
-	EXPECT_EQ((long)0b00000000000000000000000000000000000001, 0);
-	EXPECT_EQ((long)0, 0b00000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "------------------------------------long long-----------------------------------");
-
-	EXPECT_EQ((long long)0b0000000000000000001, 0);
-	EXPECT_EQ((long long)0, 0b0000000000000000001);
-	EXPECT_EQ((long long)0b0000000000000000000000001, 0);
-	EXPECT_EQ((long long)0, 0b0000000000000000000000001);
-
-	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQM-----------------------------------");
-
-	EXPECT_FAIL("%s", "--------------------------------------char--------------------------------------");
-
-	EXPECT_EQM((char)0b000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((char)0, 0b000000000000000000000000000001, 1);
-	EXPECT_EQM((char)0b00000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((char)0, 0b00000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "--------------------------------------short-------------------------------------");
-
-	EXPECT_EQM((short)0b00000000000000000000000000001, 0, 1);
-	EXPECT_EQM((short)0, 0b00000000000000000000000000001, 1);
-	EXPECT_EQM((short)0b0000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((short)0, 0b0000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "---------------------------------------int--------------------------------------");
-
-	EXPECT_EQM((int)0b0000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((int)0, 0b0000000000000000000000000000001, 1);
-	EXPECT_EQM((int)0b000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((int)0, 0b000000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "--------------------------------------long--------------------------------------");
-
-	EXPECT_EQM((long)0b000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long)0, 0b000000000000000000000000000001, 1);
-	EXPECT_EQM((long)0b00000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long)0, 0b00000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "------------------------------------long long-----------------------------------");
-
-	EXPECT_EQM((long long)0b0000000000000000001, 0, 1);
-	EXPECT_EQM((long long)0, 0b0000000000000000001, 1);
-	EXPECT_EQM((long long)0b0000000000000000000000001, 0, 1);
-	EXPECT_EQM((long long)0, 0b0000000000000000000000001, 1);
+	EXPECT_FAIL("%s", "----------------------------------Left Overfill---------------------------------");
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQB-----------------------------------");
 
-	struct {
-		unsigned char aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa : 1;
-		unsigned char aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa : 1;
-	} c = { 0 };
-
-	EXPECT_EQB(c.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 1);
-	EXPECT_EQB(c.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 1);
+	EXPECT_EQB(0, 1);
+	EXPECT_EQB(1, 0);
+	EXPECT_EQB(0000000000000000, 1);
+	EXPECT_EQB(1, 0000000000000000);
+	EXPECT_EQB(00000000000000000, 1);
+	EXPECT_EQB(1, 000000000000000000);
 
 	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "------------------------------------Overfill------------------------------------");
-
 	EXPECT_FAIL("%s", "------------------------------------EXPECT_EQ-----------------------------------");
 
-	EXPECT_FAIL("%s", "--------------------------------------char--------------------------------------");
-
-	EXPECT_EQ((char)0b000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((char)0, 0b000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((char)0b000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((char)0, 0b000000000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((char)0b000000000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((char)0, 0b000000000000000000000000000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "--------------------------------------short-------------------------------------");
-
-	EXPECT_EQ((short)0b00000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((short)0, 0b00000000000000000000000000000000000000000000001);
-	EXPECT_EQ((short)0b00000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((short)0, 0b00000000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((short)0b00000000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((short)0, 0b00000000000000000000000000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "---------------------------------------int--------------------------------------");
-
-	EXPECT_EQ((int)0b0000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((int)0, 0b0000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((int)0b0000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((int)0, 0b0000000000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((int)0b0000000000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((int)0, 0b0000000000000000000000000000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "--------------------------------------long--------------------------------------");
-
-	EXPECT_EQ((long)0b000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((long)0, 0b000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((long)0b000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((long)0, 0b000000000000000000000000000000000000000000000000000001);
-	EXPECT_EQ((long)0b000000000000000000000000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((long)0, 0b000000000000000000000000000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "------------------------------------long long-----------------------------------");
-
-	EXPECT_EQ((long long)0b000000000000000000000000001, 0);
-	EXPECT_EQ((long long)0, 0b000000000000000000000000001);
-	EXPECT_EQ((long long)0b000000000000000000000000000000001, 0);
-	EXPECT_EQ((long long)0, 0b000000000000000000000000000000001);
-	EXPECT_EQ((long long)0b000000000000000000000000000000000000001, 0);
-	EXPECT_EQ((long long)0, 0b000000000000000000000000000000000000001);
-
-	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQM-----------------------------------");
-
-	EXPECT_FAIL("%s", "--------------------------------------char--------------------------------------");
-
-	EXPECT_EQM((char)0b000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((char)0, 0b000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((char)0b000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((char)0, 0b000000000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((char)0b000000000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((char)0, 0b000000000000000000000000000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "--------------------------------------short-------------------------------------");
-
-	EXPECT_EQM((short)0b00000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((short)0, 0b00000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((short)0b00000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((short)0, 0b00000000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((short)0b00000000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((short)0, 0b00000000000000000000000000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "---------------------------------------int--------------------------------------");
-
-	EXPECT_EQM((int)0b0000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((int)0, 0b0000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((int)0b0000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((int)0, 0b0000000000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((int)0b0000000000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((int)0, 0b0000000000000000000000000000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "--------------------------------------long--------------------------------------");
-
-	EXPECT_EQM((long)0b000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long)0, 0b000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((long)0b000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long)0, 0b000000000000000000000000000000000000000000000000000001, 1);
-	EXPECT_EQM((long)0b000000000000000000000000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long)0, 0b000000000000000000000000000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "------------------------------------long long-----------------------------------");
-
-	EXPECT_EQM((long long)0b000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long long)0, 0b000000000000000000000000001, 1);
-	EXPECT_EQM((long long)0b000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long long)0, 0b000000000000000000000000000000001, 1);
-	EXPECT_EQM((long long)0b000000000000000000000000000000000000001, 0, 1);
-	EXPECT_EQM((long long)0, 0b000000000000000000000000000000000000001, 1);
-
-	EXPECT_FAIL("%s", "");
-	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQB-----------------------------------");
-
-	struct {
-		unsigned char aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa : 1;
-		unsigned char aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa : 1;
-		unsigned char aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa : 1;
-	} o = { 0 };
-
-	EXPECT_EQB(o.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 1);
-	EXPECT_EQB(o.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 1);
-	EXPECT_EQB(o.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 1);
+	EXPECT_EQ((u8)0, (u8)1);
+	EXPECT_EQ((u8)1, (u8)0);
+	EXPECT_EQ((u8)0000000000000, (u8)1);
+	EXPECT_EQ((u8)1, (u8)00000000000000);
+	EXPECT_EQ((u16)0, (u16)1);
+	EXPECT_EQ((u16)1, (u16)0);
+	EXPECT_EQ((u16)000000000000, (u16)1);
+	EXPECT_EQ((u16)1, (u16)0000000000000);
+	EXPECT_EQ((u32)0, (u32)1);
+	EXPECT_EQ((u32)1, (u32)0);
+	EXPECT_EQ((u32)000000000000, (u32)1);
+	EXPECT_EQ((u32)1, (u32)0000000000000);
+	EXPECT_EQ((u64)0, (u64)1);
+	EXPECT_EQ((u64)1, (u64)0);
+	EXPECT_EQ((u64)000000000000, (u64)1);
+	EXPECT_EQ((u64)1, (u64)0000000000000);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-------------------------------------EXPECT-------------------------------------");
 
-	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a"));
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaa", "a"));
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaa", "a"));
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaa", "a"));
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaa", "a"));
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaaa", "a"));
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FMT-----------------------------------");
+
+	EXPECT_FMT("aaaaaaaaaaaaaaaa", 1, "a", &u);
+	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaa", &u);
+	EXPECT_FMT("aaaaaaaaaaaaaaaaa", 1, "a", &u);
+	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaa", &u);
+	EXPECT_FMT("aaaaaaaaaaaaaaaaaa", 1, "a", &u);
+	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaa", &u);
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STR-----------------------------------");
+
+	EXPECT_STR("aaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaa");
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STRN----------------------------------");
+
+	EXPECT_STRN("aaaaaaaaaaaaaaaa", "a", 77);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaa", 77);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaa", "a", 83);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaa", 83);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaa", "a", 83);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaa", 83);
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-------------------------------------Overfill-----------------------------------");
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQB-----------------------------------");
+
+	EXPECT_EQB(000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 000000000000000000000000000000000000000);
+	EXPECT_EQB(000000000000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 000000000000000000000000000000000000000000000000);
+	EXPECT_EQB(000000000000000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 000000000000000000000000000000000000000000000000000);
+	EXPECT_EQB(000000000000000000000000000000000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 000000000000000000000000000000000000000000000000000000000000000000000);
+	EXPECT_EQB(0000000000000000000000000000000000000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 0000000000000000000000000000000000000000000000000000000000000000000000000);
+	EXPECT_EQB(0000000000000000000000000000000000000000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 0000000000000000000000000000000000000000000000000000000000000000000000000000);
+	EXPECT_EQB(00000000000000000000000000000000000000000000000000000000000000000000000000000000, 1);
+	EXPECT_EQB(1, 00000000000000000000000000000000000000000000000000000000000000000000000000000000);
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "------------------------------------EXPECT_EQ-----------------------------------");
+
+	EXPECT_FAIL("%s", "---------------------------------------8----------------------------------------");
+
+	EXPECT_EQ((u8)0b0000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b0000000000000000000000000001);
+	EXPECT_EQ((u8)0b0000000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b0000000000000000000000000000001);
+	EXPECT_EQ((u8)0b000000000000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b000000000000000000000000000000000001);
+	EXPECT_EQ((u8)0b000000000000000000000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u8)0b0000000000000000000000000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b0000000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u8)0b0000000000000000000000000000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b0000000000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u8)0b00000000000000000000000000000000000000000000000000000001, (u8)0);
+	EXPECT_EQ((u8)0, (u8)0b00000000000000000000000000000000000000000000000000000001);
+
+	EXPECT_FAIL("%s", "---------------------------------------16---------------------------------------");
+
+	EXPECT_EQ((u16)0b00000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b00000000000000000000000001);
+	EXPECT_EQ((u16)0b000000000000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b000000000000000000000000000000001);
+	EXPECT_EQ((u16)0b000000000000000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b000000000000000000000000000000000001);
+	EXPECT_EQ((u16)0b000000000000000000000000000000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b000000000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u16)0b0000000000000000000000000000000000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b0000000000000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u16)0b0000000000000000000000000000000000000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b0000000000000000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u16)0b00000000000000000000000000000000000000000000000000000000000001, (u16)0);
+	EXPECT_EQ((u16)0, (u16)0b00000000000000000000000000000000000000000000000000000000000001);
+
+	EXPECT_FAIL("%s", "---------------------------------------32---------------------------------------");
+
+	EXPECT_EQ((u32)0b00000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b00000000000000000000000001);
+	EXPECT_EQ((u32)0b00000000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b00000000000000000000000000001);
+	EXPECT_EQ((u32)0b0000000000000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b0000000000000000000000000000000001);
+	EXPECT_EQ((u32)0b0000000000000000000000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b0000000000000000000000000000000000000000001);
+	EXPECT_EQ((u32)0b00000000000000000000000000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b00000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u32)0b00000000000000000000000000000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b00000000000000000000000000000000000000000000000001);
+	EXPECT_EQ((u32)0b000000000000000000000000000000000000000000000000000001, (u32)0);
+	EXPECT_EQ((u32)0, (u32)0b000000000000000000000000000000000000000000000000000001);
+
+	EXPECT_FAIL("%s", "---------------------------------------64---------------------------------------");
+
+	EXPECT_EQ((u64)0b00000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b00000000000000001);
+	EXPECT_EQ((u64)0b000000000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b000000000000000000001);
+	EXPECT_EQ((u64)0b00000000000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b00000000000000000000001);
+	EXPECT_EQ((u64)0b000000000000000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b000000000000000000000000001);
+	EXPECT_EQ((u64)0b0000000000000000000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b0000000000000000000000000000001);
+	EXPECT_EQ((u64)0b0000000000000000000000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b0000000000000000000000000000000001);
+	EXPECT_EQ((u64)0b00000000000000000000000000000000000001, (u64)0);
+	EXPECT_EQ((u64)0, (u64)0b00000000000000000000000000000000000001);
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_EQM-----------------------------------");
+
+	EXPECT_FAIL("%s", "---------------------------------------8----------------------------------------");
+
+	EXPECT_EQM((u8)0b0000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b0000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b0000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b0000000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b000000000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b0000000000000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b0000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b000000000000000000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b0000000000000000000000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b0000000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b0000000000000000000000000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b0000000000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u8)0b00000000000000000000000000000000000000000000000000000001, (u8)0, 1);
+	EXPECT_EQM((u8)0, (u8)0b00000000000000000000000000000000000000000000000000000001, 1);
+
+	EXPECT_FAIL("%s", "---------------------------------------16---------------------------------------");
+
+	EXPECT_EQM((u16)0b00000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b00000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b000000000000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b000000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b0000000000000000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b0000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b000000000000000000000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b000000000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b0000000000000000000000000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b0000000000000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b0000000000000000000000000000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b0000000000000000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u16)0b00000000000000000000000000000000000000000000000000000000000001, (u16)0, 1);
+	EXPECT_EQM((u16)0, (u16)0b00000000000000000000000000000000000000000000000000000000000001, 1);
+
+	EXPECT_FAIL("%s", "---------------------------------------32---------------------------------------");
+
+	EXPECT_EQM((u32)0b00000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b00000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b00000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b00000000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b0000000000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b0000000000000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b00000000000000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b00000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b0000000000000000000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b0000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b00000000000000000000000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b00000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b00000000000000000000000000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b00000000000000000000000000000000000000000000000001, 1);
+	EXPECT_EQM((u32)0b000000000000000000000000000000000000000000000000000001, (u32)0, 1);
+	EXPECT_EQM((u32)0, (u32)0b000000000000000000000000000000000000000000000000000001, 1);
+
+	EXPECT_FAIL("%s", "---------------------------------------64---------------------------------------");
+
+	EXPECT_EQM((u64)0b00000000000000001, (u64)0, 1);
+	EXPECT_EQM((u64)0, (u64)0b00000000000000001, 1);
+	EXPECT_EQM((u64)0b000000000000000000001, (u64)0, 1);
+	EXPECT_EQM((u64)0, (u64)0b000000000000000000001, 1);
+	EXPECT_EQM((u64)0b0000000000000000000001, (u64)0, 1);
+	EXPECT_EQM((u64)0, (u64)0b0000000000000000000001, 1);
+	EXPECT_EQM((u64)0b000000000000000000000000001, (u64)0, 1);
+	EXPECT_EQM((u64)0, (u64)0b000000000000000000000000001, 1);
+	EXPECT_EQM((u64)0b0000000000000000000000000000001, (u64)0, 1);
+	EXPECT_EQM((u64)0, (u64)0b0000000000000000000000000000001, 1);
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-------------------------------------EXPECT-------------------------------------");
+
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a"));
+	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a"));
 	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a"));
 	EXPECT(!strcmp("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a"));
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FMT-----------------------------------");
 
-	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
-	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
+	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
+	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
+	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
+	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
 	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
 	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
 	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
@@ -360,8 +418,10 @@ TEST(fail_test)
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STR-----------------------------------");
 
-	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
-	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
 	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
@@ -370,8 +430,10 @@ TEST(fail_test)
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STRN----------------------------------");
 
-	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 77);
-	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 77);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 76);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 76);
+	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 80);
+	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 80);
 	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 83);
 	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 83);
 	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 89);
@@ -380,7 +442,8 @@ TEST(fail_test)
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FAIL----------------------------------");
 
-	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor inc");
+	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor in");
+	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incidi");
 	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididun");
 	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l");
 	END;
@@ -403,18 +466,56 @@ TEST(parent_test)
 	SEND;
 }
 
+TEST(t_expect)
+{
+	START;
+
+	int a = 0;
+	t_set_priv(&a);
+	EXPECT_EQ(t_get_priv(), &a);
+
+	t_expect_g(1, "", 0, "", 2, "", 0, "");
+	t_expect_g(1, "", 0, "", 4, "", 3, "");
+	t_expect_g(1, "", 0, "", 8, "", 7, "");
+	t_expect_g(1, "", 0, "", 7, "", 7, "");
+
+	t_send(0, 0);
+
+	END;
+}
+
 TEST(tests)
 {
 	SSTART;
 	RUN(success_test);
 	RUN(fail_test);
 	RUN(parent_test);
+	RUN(t_expect);
+
 	SEND;
+}
+
+int setup(void *priv)
+{
+	return 0;
+}
+
+int teardown(void *priv)
+{
+	return 0;
 }
 
 int main(int argc, char **argv)
 {
+	t_setup(setup);
+	t_teardown(teardown);
+
 	t_init(80);
 	tests();
 	t_finish();
+
+	t_init(80);
+	t_finish();
+
+	return 0;
 }

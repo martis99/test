@@ -30,7 +30,7 @@ TEST(tests)
 	SEND;
 }
 
-int setup_teardown()
+void setup_teardown()
 {
 	int a;
 	t_set_priv(&a);

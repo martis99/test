@@ -16,7 +16,7 @@ TEST(tests)
 	SEND;
 }
 
-int parameterized()
+void parameterized()
 {
 	t_init(80);
 	tests();

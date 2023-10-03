@@ -65,12 +65,12 @@ TEST(tests)
 	SEND;
 }
 
-int single();
-int multiple();
-int parameterized();
-int multilevel();
-int separated();
-int setup_teardown();
+void single();
+void multiple();
+void parameterized();
+void multilevel();
+void separated();
+void setup_teardown();
 
 int main(int argc, char **argv)
 {

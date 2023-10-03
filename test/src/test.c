@@ -19,6 +19,7 @@
 #if defined(T_WIN)
 	#include <io.h>
 #endif
+#include <inttypes.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -155,7 +156,8 @@ static inline int pur()
 #if defined(T_WIN)
 	return t_wprintf(L"└─");
 #else
-	return t_printf("└─");
+	t_printf("└─");
+	return 2;
 #endif
 }
 
@@ -164,7 +166,8 @@ static inline int pv()
 #if defined(T_WIN)
 	return t_wprintf(L"│ ");
 #else
-	return t_printf("│ ");
+	t_printf("│ ");
+	return 2;
 #endif
 }
 
@@ -173,7 +176,8 @@ static inline int pvr()
 #if defined(T_WIN)
 	return t_wprintf(L"├─");
 #else
-	return t_printf("├─");
+	t_printf("├─");
+	return 2;
 #endif
 }
 
@@ -339,61 +343,42 @@ static int print_header(int passed, const char *func)
 
 static char get_char(size_t size, va_list args)
 {
-	switch (size) {
-	case 0:
-	case 1: return (char)va_arg(args, int);
-	case 2: return (char)va_arg(args, int);
-	case 4: return (char)va_arg(args, int);
-	case 8: return (char)va_arg(args, long long);
-	}
-
-	t_printf("Unsupported type of size: %zu\n", size);
-	assert(0);
-	return 0;
+	return (char)va_arg(args, int);
 }
 
 static short get_short(size_t size, va_list args)
 {
 	switch (size) {
-	case 0:
 	case 1: return (short)va_arg(args, int);
 	case 2: return (short)va_arg(args, int);
-	case 4: return (short)va_arg(args, int);
-	case 8: return (short)va_arg(args, long long);
 	}
 
 	t_printf("Unsupported type of size: %zu\n", size);
-	assert(0);
 	return 0;
 }
 
 static int get_int(size_t size, va_list args)
 {
 	switch (size) {
-	case 0:
 	case 1: return (int)va_arg(args, int);
 	case 2: return (int)va_arg(args, int);
 	case 4: return (int)va_arg(args, int);
-	case 8: return (int)va_arg(args, long long);
 	}
 
 	t_printf("Unsupported type of size: %zu\n", size);
-	assert(0);
 	return 0;
 }
 
 static long long get_long(size_t size, va_list args)
 {
 	switch (size) {
-	case 0:
 	case 1: return (long long)va_arg(args, int);
 	case 2: return (long long)va_arg(args, int);
 	case 4: return (long long)va_arg(args, int);
 	case 8: return (long long)va_arg(args, long long);
 	}
 
-	t_printf("Unsupported type: %zu\n", size);
-	assert(0);
+	t_printf("Unsupported type of size: %zu\n", size);
 	return 0;
 }
 
@@ -441,86 +426,95 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 	int act_width = 0;
 
-	switch (act_size) {
+	int max_size = MAX(act_size, exp_size);
+
+	switch (max_size) {
 	case 0: {
-		const char a = va_arg(args, int);
-		const char b = get_char(exp_size, args);
+		const unsigned char a = get_char(act_size, args);
+		const unsigned char b = get_char(exp_size, args);
 
-		act_width = MAX(act_lcol + 1 + (1 + 4 + 1), exp_width);
+		const int byte_len = 1;
 
-		const int pl = MAX(exp_rlval - 1, 0);
+		act_width = MAX(act_lcol + 1 + (byte_len + 4 + byte_len), exp_width);
+
+		const int pl = MAX(exp_rlval - byte_len, 0);
 		const int l  = MAX(pl - lover, 0);
 
 		lover -= pl - l;
 
-		const int r = MAX(exp_rrval - 1 - lover, 0);
+		const int r = MAX(exp_rrval - byte_len - lover, 0);
 		t_printf("%*s%c %s %c%-*s", l, "", a ? '1' : '0', cond, b ? '1' : '0', r, "");
 		break;
 	}
 	case 1: {
-		const unsigned char a = va_arg(args, int);
-		const unsigned char b = va_arg(args, int);
+		const unsigned char a = get_char(act_size, args);
+		const unsigned char b = get_char(exp_size, args);
 
-		act_width = MAX(act_lcol + 1 + (8 + 4 + 8), exp_width);
+		const int bin_len = 8;
 
-		const int pl = MAX(exp_rlval - 8, 0);
+		act_width = MAX(act_lcol + 1 + (bin_len + 4 + bin_len), exp_width);
+
+		const int pl = MAX(exp_rlval - bin_len, 0);
 		const int l  = MAX(pl - lover, 0);
 
 		lover -= pl - l;
 
-		const int r = MAX(exp_rrval - 8 - lover, 0);
+		const int r = MAX(exp_rrval - bin_len - lover, 0);
 		t_printf("%*s" BYTE_TO_BIN_PATTERN " %s " BYTE_TO_BIN_PATTERN "%*s", l, "", BYTE_TO_BIN(a), cond, BYTE_TO_BIN(b), r, "");
 		break;
 	}
 	case 2: {
-		const short a = (short)va_arg(args, int);
-		const short b = get_short(exp_size, args);
+		const unsigned short a = get_short(act_size, args);
+		const unsigned short b = get_short(exp_size, args);
 
-		act_width = MAX(act_lcol + 1 + (8 + 4 + 8), exp_width);
+		const int hex_len = max_size * 2;
 
-		const int pl = MAX(exp_rlval - 8, 0);
+		act_width = MAX(act_lcol + 1 + (hex_len + 4 + hex_len), exp_width);
+
+		const int pl = MAX(exp_rlval - hex_len, 0);
 		const int l  = MAX(pl - lover, 0);
 
 		lover -= pl - l;
 
-		const int r = MAX(exp_rrval - 8 - lover, 0);
-		t_printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
+		const int r = MAX(exp_rrval - hex_len - lover, 0);
+		t_printf("%*s%04X %s %04X%*s", l, "", a, cond, b, r, "");
 		break;
 	}
 	case 4: {
-		const int a = va_arg(args, int);
+		const int a = get_int(act_size, args);
 		const int b = get_int(exp_size, args);
 
-		act_width = MAX(act_lcol + 1 + (8 + 4 + 8), exp_width);
+		const int hex_len = max_size * 2;
 
-		const int pl = MAX(exp_rlval - 8, 0);
+		act_width = MAX(act_lcol + 1 + (hex_len + 4 + hex_len), exp_width);
+
+		const int pl = MAX(exp_rlval - hex_len, 0);
 		const int l  = MAX(pl - lover, 0);
 
 		lover -= pl - l;
 
-		const int r = MAX(exp_rrval - 8 - lover, 0);
+		const int r = MAX(exp_rrval - hex_len - lover, 0);
 		t_printf("%*s%08X %s %08X%*s", l, "", a, cond, b, r, "");
 		break;
 	}
 	case 8: {
-		const long long a = va_arg(args, long long);
-		const long long b = get_long(exp_size, args);
+		const long a = get_long(act_size, args);
+		const long b = get_long(exp_size, args);
 
-		act_width = MAX(act_lcol + 1 + (16 + 4 + 16), exp_width);
+		const int hex_len = max_size * 2;
 
-		const int pl = MAX(exp_rlval - 16, 0);
+		act_width = MAX(act_lcol + 1 + (hex_len + 4 + hex_len), exp_width);
+
+		const int pl = MAX(exp_rlval - hex_len, 0);
 		const int l  = MAX(pl - lover, 0);
 
 		lover -= pl - l;
 
-		const int r = MAX(exp_rrval - 16 - lover, 0);
-		t_printf("%*s%p %s %p%*s", l, "", (void *)a, cond, (void *)b, r, "");
+		const int r = MAX(exp_rrval - hex_len - lover, 0);
+		t_printf("%*s%016lX %s %016lX%*s", l, "", a, cond, b, r, "");
 		break;
 	}
-	default:
-		t_printf("Unsupported type: %zu\n", act_size);
-		assert(0);
-		break;
+	default: t_printf("Unsupported type of size: %zu\n", act_size); return;
 	}
 
 	const int over = MAX(act_width - exp_width, 0);
@@ -653,6 +647,7 @@ void t_expect_str(int passed, const char *func, int line, const char *act, const
 {
 	print_str(passed, func, line, act, exp, "==", act == NULL ? 0 : (int)strlen(act), exp == NULL ? 0 : (int)strlen(exp));
 }
+
 void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len)
 {
 	print_str(passed, func, line, act, exp, "==", (int)MIN(len, act == NULL ? 0 : strlen(act)), (int)MIN(len, exp == NULL ? 0 : strlen(exp)));
@@ -662,6 +657,7 @@ void t_expect_wstr(int passed, const char *func, int line, const wchar_t *act, c
 {
 	print_wstr(passed, func, line, act, exp, "==", act == NULL ? 0 : (int)wcslen(act), exp == NULL ? 0 : (int)wcslen(exp));
 }
+
 void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len)
 {
 	print_wstr(passed, func, line, act, exp, "==", (int)MIN(len, act == NULL ? 0 : wcslen(act)), (int)MIN(len, exp == NULL ? 0 : wcslen(exp)));

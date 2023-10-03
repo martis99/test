@@ -50,7 +50,7 @@ TEST(tests)
 	SEND;
 }
 
-int multilevel()
+void multilevel()
 {
 	t_init(80);
 	tests();
