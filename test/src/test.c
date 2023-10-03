@@ -45,18 +45,29 @@
   (byte & 0x01 ? '1' : '0')
 // clang-format on
 
-struct tdata {
+typedef struct tdata_s {
+	void *priv;
+	setup_fn setup;
+	setup_fn teardown;
+	print_fn print;
+	wprint_fn wprint;
 	int width;
 	long long passed;
 	long long failed;
 	int depth;
-};
+} tdata_t;
 
-static struct tdata s_data;
+static tdata_t s_data;
 
-static void *s_priv;
-static setup_fn s_setup;
-static setup_fn s_teardown;
+tdata_t t_get_data()
+{
+	return s_data;
+}
+
+void t_set_data(tdata_t data)
+{
+	s_data = data;
+}
 
 static FILE *t_freopen(const char *path, const char *mode, FILE *file)
 {
@@ -74,10 +85,10 @@ static int t_printv(const char *fmt, va_list args)
 {
 	va_list copy;
 	va_copy(copy, args);
-	int ret = vprintf(fmt, copy);
+	int ret = s_data.print ? s_data.print(fmt, copy) : 0;
 	if (ret < 0 && errno == 0) {
 		t_freopen(NULL, "w", stdout);
-		ret = vprintf(fmt, copy);
+		ret = s_data.print ? s_data.print(fmt, copy) : 0;
 	}
 	va_end(copy);
 	return ret;
@@ -97,10 +108,10 @@ static int t_wprintv(const wchar_t *fmt, va_list args)
 	va_list copy;
 	va_copy(copy, args);
 	errno	= 0;
-	int ret = vwprintf(fmt, copy);
+	int ret = s_data.wprint ? s_data.wprint(fmt, copy) : 0;
 	if (ret < 0 && errno == 0) {
 		t_freopen(NULL, "w", stdout);
-		ret = vwprintf(fmt, copy);
+		ret = s_data.wprint ? s_data.wprint(fmt, copy) : 0;
 	}
 	va_end(copy);
 	return ret;
@@ -117,22 +128,32 @@ static int t_wprintf(const wchar_t *fmt, ...)
 
 void t_set_priv(void *priv)
 {
-	s_priv = priv;
+	s_data.priv = priv;
 }
 
 void t_setup(setup_fn setup)
 {
-	s_setup = setup;
+	s_data.setup = setup;
 }
 
 void t_teardown(teardown_fn teardown)
 {
-	s_teardown = teardown;
+	s_data.teardown = teardown;
+}
+
+void t_print(print_fn print)
+{
+	s_data.print = print;
+}
+
+void t_wprint(wprint_fn wprint)
+{
+	s_data.wprint = wprint;
 }
 
 void *t_get_priv()
 {
-	return s_priv;
+	return s_data.priv;
 }
 
 static inline void t_sprint()
@@ -185,6 +206,9 @@ void t_init(int width)
 {
 	t_sprint();
 
+	s_data.print  = vprintf;
+	s_data.wprint = vwprintf;
+
 	s_data.width  = width;
 	s_data.passed = 0;
 	s_data.failed = 0;
@@ -203,15 +227,15 @@ int t_finish()
 
 void t_start()
 {
-	if (s_setup) {
-		s_setup(s_priv);
+	if (s_data.setup) {
+		s_data.setup(s_data.priv);
 	}
 }
 
 int t_end(int passed, const char *func)
 {
-	if (s_teardown) {
-		s_teardown(s_priv);
+	if (s_data.teardown) {
+		s_data.teardown(s_data.priv);
 	}
 	if (passed) {
 		t_sprint();

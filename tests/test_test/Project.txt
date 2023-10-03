@@ -1,5 +1,5 @@
 NAME: test_test
 TYPE: EXE
 SOURCE: src
-DEPENDS: test
-INCLUDES: test
+DEPENDS: libtest_test
+INCLUDES: libtest_test
