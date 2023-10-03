@@ -3,6 +3,8 @@ cross-platform testing library for C
 
 ![image](https://user-images.githubusercontent.com/61162271/229194843-f41ace2c-17a8-44b0-b6bb-86c8fbd636b0.png)
 
+[![codecov](https://codecov.io/github/martis99/test/graph/badge.svg?token=4WWK2HCZAF)](https://codecov.io/github/martis99/test)
+
 ***
 
 ## Usage
