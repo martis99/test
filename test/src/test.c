@@ -450,7 +450,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 	int act_width = 0;
 
-	int max_size = MAX(act_size, exp_size);
+	int max_size = MAX((int)act_size, (int)exp_size);
 
 	switch (max_size) {
 	case 0: {
@@ -522,8 +522,8 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		break;
 	}
 	case 8: {
-		const long a = get_long(act_size, args);
-		const long b = get_long(exp_size, args);
+		const long long a = get_long(act_size, args);
+		const long long b = get_long(exp_size, args);
 
 		const int hex_len = max_size * 2;
 
@@ -535,7 +535,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 		lover -= pl - l;
 
 		const int r = MAX(exp_rrval - hex_len - lover, 0);
-		t_printf("%*s%016lX %s %016lX%*s", l, "", a, cond, b, r, "");
+		t_printf("%*s%016llX %s %016llX%*s", l, "", a, cond, b, r, "");
 		break;
 	}
 	default: t_printf("Unsupported type of size: %zu\n", act_size); return;
