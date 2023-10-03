@@ -17,8 +17,8 @@ void t_set_priv(void *priv);
 void t_setup(setup_fn setup);
 void t_teardown(teardown_fn teardown);
 
-void t_print(print_fn print);
-void t_wprint(wprint_fn wprint);
+void t_set_print(print_fn print);
+void t_set_wprint(wprint_fn wprint);
 
 void *t_get_priv();
 

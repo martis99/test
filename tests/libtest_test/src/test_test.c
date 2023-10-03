@@ -513,8 +513,8 @@ TEST(t_t_setup_teardown)
 
 	tdata_t tdata = t_get_data();
 
-	t_print(NULL);
-	t_wprint(NULL);
+	t_set_print(NULL);
+	t_set_wprint(NULL);
 
 	t_setup(setup);
 	t_teardown(teardown);
@@ -533,8 +533,8 @@ TEST(t_t_expect)
 
 	tdata_t tdata = t_get_data();
 
-	t_print(NULL);
-	t_wprint(NULL);
+	t_set_print(NULL);
+	t_set_wprint(NULL);
 
 	t_expect_g(1, __func__, __LINE__, "", 2, "", 0, "==");
 	t_expect_g(1, __func__, __LINE__, "", 4, "", 3, "==");
@@ -556,13 +556,13 @@ int t_wprint_cb(const wchar_t *fmt, va_list args)
 	return -1;
 }
 
-TEST(t_t_print)
+TEST(t_t_set_print)
 {
 	START;
 	tdata_t tdata = t_get_data();
 
-	t_print(t_print_cb);
-	t_wprint(t_wprint_cb);
+	t_set_print(t_print_cb);
+	t_set_wprint(t_wprint_cb);
 
 	EXPECT_STR("a", "b");
 	EXPECT_WSTR(L"a", L"b");
@@ -578,8 +578,8 @@ TEST(t_t_send)
 
 	tdata_t tdata = t_get_data();
 
-	t_print(NULL);
-	t_wprint(NULL);
+	t_set_print(NULL);
+	t_set_wprint(NULL);
 
 	t_send(0, 0);
 	t_send(0, 1);
@@ -595,8 +595,8 @@ TEST(t_t_finish)
 
 	tdata_t tdata = t_get_data();
 
-	t_print(NULL);
-	t_wprint(NULL);
+	t_set_print(NULL);
+	t_set_wprint(NULL);
 
 	t_finish();
 
@@ -607,7 +607,10 @@ TEST(t_t_finish)
 
 TEST(tests)
 {
-	SSTART;
+	int _spassed = 0;
+	int _sfailed = 0;
+	t_sstart("test_test");
+
 	RUN(success_test);
 	RUN(fail_test);
 	RUN(parent_test);
@@ -615,7 +618,7 @@ TEST(tests)
 	RUN(t_t_set_priv);
 	RUN(t_t_setup_teardown);
 	RUN(t_t_expect);
-	RUN(t_t_print);
+	RUN(t_t_set_print);
 	RUN(t_t_send);
 	RUN(t_t_finish);
 
@@ -652,8 +655,8 @@ int test_test()
 
 	tdata_t tdata = t_get_data();
 
-	t_print(NULL);
-	t_wprint(NULL);
+	t_set_print(NULL);
+	t_set_wprint(NULL);
 
 	int ret = test_test_print();
 

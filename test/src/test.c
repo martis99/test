@@ -141,12 +141,12 @@ void t_teardown(teardown_fn teardown)
 	s_data.teardown = teardown;
 }
 
-void t_print(print_fn print)
+void t_set_print(print_fn print)
 {
 	s_data.print = print;
 }
 
-void t_wprint(wprint_fn wprint)
+void t_set_wprint(wprint_fn wprint)
 {
 	s_data.wprint = wprint;
 }
