@@ -5,6 +5,6 @@
 int main(int argc, char **argv)
 {
 	t_init(80);
-	test_test_print();
+	t_run(test_test, 1);
 	return t_finish();
 }

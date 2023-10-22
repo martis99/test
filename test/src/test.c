@@ -225,6 +225,26 @@ int t_finish()
 	return (int)s_data.failed;
 }
 
+int t_run(test_fn fn, int print)
+{
+	tdata_t tdata;
+
+	if (print == 0) {
+		tdata = t_get_data();
+
+		t_set_print(NULL);
+		t_set_wprint(NULL);
+	}
+
+	int ret = fn();
+
+	if (print == 0) {
+		t_set_data(tdata);
+	}
+
+	return ret;
+}
+
 void t_start()
 {
 	if (s_data.setup) {

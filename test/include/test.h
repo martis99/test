@@ -8,6 +8,9 @@
 void t_init(int width);
 int t_finish();
 
+typedef int (*test_fn)();
+int t_run(test_fn fn, int print);
+
 typedef int (*setup_fn)(void *priv);
 typedef int (*teardown_fn)(void *priv);
 typedef int (*print_fn)(const char *fmt, va_list args);

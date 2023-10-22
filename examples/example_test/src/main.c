@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 {
 	printf(SEP, "main");
 	t_init(80);
-	tests();
+	t_run(tests, 1);
 	t_finish();
 
 	printf(SEP, "single");

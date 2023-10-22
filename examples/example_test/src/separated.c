@@ -38,6 +38,6 @@ TEST(tests)
 void separated()
 {
 	t_init(80);
-	tests();
+	t_run(tests, 1);
 	t_finish();
 }

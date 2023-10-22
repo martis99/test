@@ -1,6 +1,8 @@
-#include "test.h"
+#include "test_test.h"
 
 #include "type.h"
+
+#include "test.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -482,6 +484,21 @@ TEST(parent_test)
 	SEND;
 }
 
+int empty_test()
+{
+	return 1;
+}
+
+TEST(t_t_run)
+{
+	START;
+
+	EXPECT_EQ(t_run(empty_test, 0), 1);
+	EXPECT_EQ(t_run(empty_test, 1), 1);
+
+	END;
+}
+
 TEST(t_t_set_priv)
 {
 	START;
@@ -615,6 +632,7 @@ TEST(tests)
 	RUN(fail_test);
 	RUN(parent_test);
 
+	RUN(t_t_run);
 	RUN(t_t_set_priv);
 	RUN(t_t_setup_teardown);
 	RUN(t_t_expect);
@@ -625,42 +643,12 @@ TEST(tests)
 	SEND;
 }
 
-int test_test();
-
-typedef int (*test_test_fn)();
-static test_test_fn s_test_test_fn = test_test;
-
-int test_test_print()
+int test_test()
 {
-	s_test_test_fn();
-
 	tests();
 
 	tdata_t tdata = t_get_data();
 	tdata.passed += tdata.failed;
 	tdata.failed = 0;
 	t_set_data(tdata);
-
-	return 0;
-}
-
-static int no_test_test()
-{
-	return 0;
-}
-
-int test_test()
-{
-	s_test_test_fn = no_test_test;
-
-	tdata_t tdata = t_get_data();
-
-	t_set_print(NULL);
-	t_set_wprint(NULL);
-
-	int ret = test_test_print();
-
-	t_set_data(tdata);
-
-	return ret;
 }
