@@ -1,11 +1,12 @@
 # test
+
 cross-platform testing library for C
 
-![image](https://user-images.githubusercontent.com/61162271/229194843-f41ace2c-17a8-44b0-b6bb-86c8fbd636b0.png)
-
 [![codecov](https://codecov.io/github/martis99/test/graph/badge.svg?token=4WWK2HCZAF)](https://codecov.io/github/martis99/test)
+[![Coverage Status](https://coveralls.io/repos/github/martis99/test/badge.svg)](https://coveralls.io/github/martis99/test)
+[![test](https://github.com/martis99/test/actions/workflows/test.yml/badge.svg)](https://github.com/martis99/test/actions/workflows/test.yml)
 
-***
+![image](https://user-images.githubusercontent.com/61162271/229194843-f41ace2c-17a8-44b0-b6bb-86c8fbd636b0.png)
 
 ## Usage
 
@@ -304,8 +305,8 @@ int main(int argc, char **argv)
 
 ## Build
 
-1. Clone repository:
+1. Clone repository
 ```
 git clone https://github.com/martis99/test.git
 ```
-2. Refer to [build usage](https://github.com/martis99/build#usage).
+2. Refer to [build usage](https://github.com/martis99/build#usage)
