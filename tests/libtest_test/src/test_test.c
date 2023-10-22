@@ -651,4 +651,6 @@ int test_test()
 	tdata.passed += tdata.failed;
 	tdata.failed = 0;
 	t_set_data(tdata);
+
+	return 0;
 }
