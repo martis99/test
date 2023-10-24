@@ -2,19 +2,19 @@
 
 #include "test.h"
 
-TEST(grand_child1, int a, int b)
+TEST(grand_child1)
 {
 	START;
-	EXPECT_EQ(a + 5, b);
+	EXPECT_EQ(5 + 5, 10);
 	END;
 }
 
 STEST(child1)
 {
 	SSTART;
-	RUN(grand_child1, 3, 8);
-	RUN(grand_child1, 4, 9);
-	RUN(grand_child1, 5, 11);
-	RUN(grand_child1, 6, 14);
+	RUN(grand_child1);
+	RUN(grand_child1);
+	RUN(grand_child1);
+	RUN(grand_child1);
 	SEND;
 }

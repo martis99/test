@@ -1,6 +1,6 @@
 #include "test.h"
 
-TEST(test, int a, int b, int c)
+TESTP(test, int a, int b, int c)
 {
 	START;
 	EXPECT_EQ(a + b, c);
@@ -10,9 +10,9 @@ TEST(test, int a, int b, int c)
 TEST(tests)
 {
 	SSTART;
-	RUN(test, 4, 5, 9);
-	RUN(test, 1, 2, 3);
-	RUN(test, 2, 4, 6);
+	RUNP(test, 4, 5, 9);
+	RUNP(test, 1, 2, 3);
+	RUNP(test, 2, 4, 6);
 	SEND;
 }
 

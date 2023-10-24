@@ -19,8 +19,8 @@ TEST(success_test)
 	EXPECT_LT(1, 2);
 	EXPECT_LE(1, 2);
 	EXPECT_LE(2, 2);
-	EXPECT_EQM(0b00000011, 0b00001010, 0b00000010);
-	EXPECT_NEM(0b00000011, 0b00001010, 0b00001011);
+	EXPECT_EQM(0x3, 0xa, 0x2);
+	EXPECT_NEM(0x3, 0xa, 0xb);
 	EXPECT_FMT("123", 1, "%3u", &u);
 	EXPECT(!strcmp("a", "a"));
 	END;
@@ -33,7 +33,7 @@ TEST(fail_test)
 	END;
 }
 
-TEST(parameterized_test, int a, int b)
+TESTP(parameterized_test, int a, int b)
 {
 	START;
 	EXPECT_EQ(a, b);
@@ -52,9 +52,9 @@ TEST(parent_test)
 {
 	SSTART;
 	RUN(child_test);
-	RUN(parameterized_test, 1, 1);
-	RUN(parameterized_test, 2, 2);
-	RUN(parameterized_test, 3, 3);
+	RUNP(parameterized_test, 1, 1);
+	RUNP(parameterized_test, 2, 2);
+	RUNP(parameterized_test, 3, 3);
 	SEND;
 }
 
@@ -74,6 +74,9 @@ void setup_teardown();
 
 int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	printf(SEP, "main");
 	t_init(80);
 	t_run(tests, 1);

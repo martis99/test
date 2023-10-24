@@ -71,8 +71,6 @@ void t_set_data(tdata_t data)
 
 static FILE *t_freopen(const char *path, const char *mode, FILE *file)
 {
-	FILE *new_file = NULL;
-
 #if defined(T_WIN)
 	freopen_s(&file, path, mode, file);
 #else
@@ -387,6 +385,7 @@ static int print_header(int passed, const char *func)
 
 static char get_char(size_t size, va_list args)
 {
+	(void)size;
 	return (char)va_arg(args, int);
 }
 
@@ -620,8 +619,8 @@ static void print_str(int passed, const char *func, int line, const char *act, c
 	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
 	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
 
-	const int len	  = MAX(llen, rlen) * 2 + 4;
-	const int act_col = llen + 4 + rlen;
+	const int len = MAX(llen, rlen) * 2 + 4;
+	//const int act_col = llen + 4 + rlen;
 
 	const int width = len < exp_lcol ? exp_lcol : exp_width;
 	const int a	= len < exp_lcol ? MAX(exp_rcol + 1, 0) : 0;
@@ -652,8 +651,8 @@ static void print_wstr(int passed, const char *func, int line, const wchar_t *ac
 	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
 	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
 
-	const int len	  = MAX(llen, rlen) * 2 + 4;
-	const int act_col = llen + 4 + rlen;
+	const int len = MAX(llen, rlen) * 2 + 4;
+	//const int act_col = llen + 4 + rlen;
 
 	const int width = len < exp_lcol ? exp_lcol : exp_width;
 	const int a	= len < exp_lcol ? MAX(exp_rcol + 1, 0) : 0;

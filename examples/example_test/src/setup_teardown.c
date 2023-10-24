@@ -14,7 +14,7 @@ int teardown(void *priv)
 	return 0;
 }
 
-TEST(test, int v)
+TESTP(test, int v)
 {
 	START;
 	int *a = t_get_priv();
@@ -25,8 +25,8 @@ TEST(test, int v)
 TEST(tests)
 {
 	SSTART;
-	RUN(test, 5);
-	RUN(test, 4);
+	RUNP(test, 5);
+	RUNP(test, 4);
 	SEND;
 }
 

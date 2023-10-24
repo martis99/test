@@ -4,6 +4,9 @@
 
 int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	t_init(80);
 	t_run(test_test, 1);
 	return t_finish();

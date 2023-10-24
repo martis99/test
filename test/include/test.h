@@ -54,7 +54,8 @@ void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...);
 
 //Declare test
-#define TEST(_name, ...) static inline int _name(__VA_ARGS__)
+#define TEST(_name)	  static inline int _name()
+#define TESTP(_name, ...) static inline int _name(__VA_ARGS__)
 
 //Test start
 #define START            \
@@ -74,7 +75,16 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 	t_sstart(__func__)
 
 //Run test
-#define RUN(_fn, ...)                   \
+#define RUN(_fn)                    \
+	do {                        \
+		if (_fn()) {        \
+			_sfailed++; \
+		} else {            \
+			_spassed++; \
+		}                   \
+	} while (0)
+
+#define RUNP(_fn, ...)                  \
 	do {                            \
 		if (_fn(__VA_ARGS__)) { \
 			_sfailed++;     \
