@@ -3,7 +3,6 @@
 
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <wchar.h>
 
 void t_init(int width);

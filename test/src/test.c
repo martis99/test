@@ -21,11 +21,9 @@
 #endif
 #include <inttypes.h>
 #include <memory.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wchar.h>
 
 #if defined(T_WIN)
 	#define vprintf vprintf_s
