@@ -20,6 +20,7 @@
 	#include <io.h>
 #endif
 #include <inttypes.h>
+#include <memory.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +56,11 @@ typedef struct tdata_s {
 	long long passed;
 	long long failed;
 	int depth;
+	char *buf;
+	size_t buf_size;
+	size_t buf_len;
+	const char *exp;
+	size_t exp_len;
 } tdata_t;
 
 static tdata_t s_data;
@@ -211,6 +217,11 @@ void t_init(int width)
 	s_data.passed = 0;
 	s_data.failed = 0;
 	s_data.depth  = -1;
+
+	s_data.buf_size = 256;
+	s_data.buf_len	= 0;
+
+	s_data.buf = malloc(s_data.buf_size);
 }
 
 int t_finish()
@@ -220,6 +231,9 @@ int t_finish()
 	} else {
 		t_printf("\033[0;31mFAILED %llu/%llu %s\033[0m\n", s_data.failed, s_data.failed + s_data.passed, s_data.failed == 1 ? "TEST" : "TESTS");
 	}
+
+	free(s_data.buf);
+
 	return (int)s_data.failed;
 }
 
@@ -375,10 +389,10 @@ static int print_header(int passed, const char *func)
 #endif
 	}
 	int len = 0;
-	for (int i = 0; i < s_data.depth + 1; i++) {
+	for (int i = 0; i < s_data.depth; i++) {
 		len += pv();
 	}
-	len += pvr();
+	len += pv();
 	t_eprint();
 	return len;
 }
@@ -718,4 +732,141 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 	t_printf("%*s L%d\033[0m\n", MAX(s_data.width - len + 9, 0), "", line);
 
 	va_end(args);
+}
+
+int t_fprintf(void *priv, const char *fmt, ...)
+{
+	(void)priv;
+
+	va_list args;
+	va_start(args, fmt);
+
+	int ret = vsnprintf(s_data.buf + s_data.buf_len, s_data.buf_size - s_data.buf_len, fmt, args);
+
+	va_end(args);
+
+	s_data.buf_len += ret;
+
+	return ret;
+}
+
+void t_expect_fstr_start(const char *exp, size_t len)
+{
+	(void)exp;
+	(void)len;
+	s_data.exp     = exp;
+	s_data.exp_len = len;
+
+	if (s_data.buf_size < len + 1) {
+		s_data.buf_size = len + 1;
+		s_data.buf	= realloc(s_data.buf, s_data.buf_size);
+	}
+
+	memset(s_data.buf, 0, s_data.buf_size);
+	s_data.buf_len = 0;
+}
+
+int t_expect_fstr_end(int passed, const char *func, int line)
+{
+	(void)passed;
+	(void)func;
+	(void)line;
+
+	size_t ln	    = 0;
+	size_t col	    = 0;
+	size_t line_start   = 0;
+	size_t exp_line_end = 0;
+	size_t act_line_end = 0;
+	int diff	    = 0;
+
+	for (size_t i = 0; i < s_data.exp_len && i < s_data.buf_len; i++) {
+		const char exp = s_data.exp[i];
+		const char act = s_data.buf[i];
+
+		if (act != exp) {
+			diff = 1;
+		}
+
+		if (diff == 0) {
+			if (exp == '\n') {
+				col = 0;
+				ln++;
+				line_start = i + 1;
+			} else {
+				col++;
+			}
+		} else {
+			if (exp == '\n' && exp_line_end == 0) {
+				exp_line_end = i + 1;
+			}
+			if (act == '\n' && act_line_end == 0) {
+				act_line_end = i + 1;
+			}
+			if (exp_line_end != 0 && act_line_end != 0) {
+				break;
+			}
+		}
+	}
+
+	if (diff == 0 && s_data.exp_len == s_data.buf_len) {
+		return 0;
+	}
+
+	if (exp_line_end == 0) {
+		exp_line_end = s_data.exp_len;
+	}
+	if (act_line_end == 0) {
+		act_line_end = s_data.buf_len;
+	}
+
+	const int exp_width = s_data.width - print_header(passed, func);
+
+	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
+
+	int act_app = 0;
+
+	print_header(passed, func);
+
+	t_printf("\033[0;31m");
+
+	int h_len = t_printf("act(%d): ", ln);
+
+	for (size_t i = 0; i < act_line_end - line_start; i++) {
+		char c = s_data.buf[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n': t_printf("\\n"); act_app += (i <= col ? 1 : 0); break;
+		case '\r': t_printf("\\r"); act_app += (i <= col ? 1 : 0); break;
+		case '\t': t_printf("\\t"); act_app += (i <= col ? 1 : 0); break;
+		default: t_printf("%c", c); break;
+		}
+		// clang-format on
+	}
+
+	int exp_app = 0;
+
+	t_printf("\033[0m\n");
+
+	print_header(passed, func);
+
+	t_printf("\033[0;31mexp(%d): ", ln);
+	for (size_t i = 0; i < exp_line_end - line_start; i++) {
+		char c = s_data.exp[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n':t_printf("\\n"); exp_app += (i <= col ? 1 : 0); break;
+		case '\r':t_printf("\\r"); exp_app += (i <= col ? 1 : 0); break;
+		case '\t':t_printf("\\t"); exp_app += (i <= col ? 1 : 0); break;
+		default: t_printf("%c", c); break;
+		}
+		// clang-format on
+	}
+
+	t_printf("\033[0m\n");
+
+	print_header(passed, func);
+
+	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
+
+	return 1;
 }

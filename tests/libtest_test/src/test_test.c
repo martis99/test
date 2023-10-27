@@ -4,7 +4,9 @@
 
 #include "test.h"
 
+#include <memory.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct tdata_s {
@@ -17,6 +19,11 @@ typedef struct tdata_s {
 	long long passed;
 	long long failed;
 	int depth;
+	char *buf;
+	size_t buf_size;
+	size_t buf_len;
+	const char *exp;
+	size_t exp_len;
 } tdata_t;
 
 extern tdata_t t_get_data();
@@ -54,6 +61,8 @@ TEST(success_test)
 	EXPECT_WSTRN(NULL, NULL, 1);
 	EXPECT_WSTRN(L"ab", L"ac", 1);
 	EXPECT(!strcmp("a", "a"));
+	char exp[] = "\tTest\n\tTest";
+	EXPECT_FSTR(t_fprintf(NULL, "\tTest\n\tTest"), exp, sizeof(exp) - 1);
 	END;
 }
 
@@ -464,6 +473,51 @@ TEST(fail_test)
 	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incidi");
 	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididun");
 	EXPECT_FAIL("%s", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l");
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FSTR----------------------------------");
+	EXPECT_FAIL("%s", "---------------------------------Missing actual---------------------------------");
+	{
+		char exp[] = "Test\r\n";
+		EXPECT_FSTR(t_fprintf(NULL, "est\r\n"), exp, sizeof(exp) - 1);
+	}
+	EXPECT_FAIL("%s", "--------------------------------Missing expected--------------------------------");
+	{
+		char exp[] = "est\n";
+		EXPECT_FSTR(t_fprintf(NULL, "Test\n"), exp, sizeof(exp) - 1);
+	}
+	EXPECT_FAIL("%s", "------------------------------------Different-----------------------------------");
+	{
+		char exp[] = "Test\n";
+		EXPECT_FSTR(t_fprintf(NULL, "Tost\n"), exp, sizeof(exp) - 1);
+	}
+	EXPECT_FAIL("%s", "------------------------------Missing \\n expected------------------------------");
+	{
+		char exp[] = "Test";
+		EXPECT_FSTR(t_fprintf(NULL, "Test\n"), exp, sizeof(exp) - 1);
+	}
+	EXPECT_FAIL("%s", "-------------------------------Missing \\n actual-------------------------------");
+	{
+		char exp[] = "Test\n";
+		EXPECT_FSTR(t_fprintf(NULL, "Test"), exp, sizeof(exp) - 1);
+	}
+	EXPECT_FAIL("%s", "----------------------------Different in second line----------------------------");
+	{
+		char exp[] = "\tTest\n\tTest";
+		EXPECT_FSTR(t_fprintf(NULL, "\tTest\n\tGest"), exp, sizeof(exp) - 1);
+	}
+	EXPECT_FAIL("%s", "---------------------------------------Long-------------------------------------");
+	{
+		char exp[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit,\n"
+			     "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
+			     "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n"
+			     "Duis aute irure dolor in rep";
+		EXPECT_FSTR(t_fprintf(NULL, "Lorem ipsum dolor sit amet, consectetur adipiscing elit,\n"
+					    "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
+					    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n"
+					    "Duis aute irure dolor in res"),
+			    exp, sizeof(exp) - 1);
+	}
 	END;
 }
 
@@ -625,6 +679,8 @@ TEST(t_t_finish)
 	START;
 
 	tdata_t tdata = t_get_data();
+
+	tdata.buf = malloc(tdata.buf_size);
 
 	t_set_print(NULL);
 	t_set_wprint(NULL);

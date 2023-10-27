@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <wchar.h>
 
 void t_init(int width);
@@ -52,6 +53,10 @@ void t_expect_wstr(int passed, const char *func, int line, const wchar_t *act, c
 void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len);
 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...);
+
+int t_fprintf(void *priv, const char *fmt, ...);
+void t_expect_fstr_start(const char *exp, size_t len);
+int t_expect_fstr_end(int passed, const char *func, int line);
 
 //Declare test
 #define TEST(_name)	  static inline int _name()
@@ -229,6 +234,15 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 		t_expect_fail(_passed, __func__, __LINE__, _fmt, __VA_ARGS__); \
 		_passed = 0;                                                   \
                                                                                \
+	} while (0)
+
+#define EXPECT_FSTR(_print, _expected, _len)                               \
+	do {                                                               \
+		t_expect_fstr_start(_expected, _len);                      \
+		_print;                                                    \
+		if (t_expect_fstr_end(_passed, __func__, __LINE__) != 0) { \
+			_passed = 0;                                       \
+		}                                                          \
 	} while (0)
 
 #endif
