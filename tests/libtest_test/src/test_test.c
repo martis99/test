@@ -680,12 +680,18 @@ TEST(t_t_finish)
 
 	tdata_t tdata = t_get_data();
 
+	char *buf = tdata.buf;
+
 	tdata.buf = malloc(tdata.buf_size);
 
 	t_set_print(NULL);
 	t_set_wprint(NULL);
 
+	t_set_data(tdata);
+
 	t_finish();
+
+	tdata.buf = buf;
 
 	t_set_data(tdata);
 
