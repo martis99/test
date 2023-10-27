@@ -371,10 +371,10 @@ int t_wstrncmp(const wchar_t *act, const wchar_t *exp, size_t len)
 	return wcsncmp(act, exp, len);
 }
 
-static int print_header(int passed, const char *func)
+static int print_header(int passed, const char *func, int child)
 {
 	t_sprint();
-	if (passed) {
+	if (passed && child == 0) {
 		int len = 0;
 		for (int i = 0; i < s_data.depth; i++) {
 			len += pv();
@@ -442,7 +442,7 @@ static long long get_long(size_t size, va_list args)
 
 static void print_values(int passed, const char *func, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, int inc, va_list args)
 {
-	int exp_width = s_data.width - print_header(passed, func);
+	int exp_width = s_data.width - print_header(passed, func, 0);
 
 	int exp_lcol = (exp_width - 1) / 2;
 	int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
@@ -580,7 +580,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 
 void t_expect_ch(int passed, const char *func, int line, const char *check)
 {
-	int exp_width = s_data.width - print_header(passed, func);
+	int exp_width = s_data.width - print_header(passed, func, 0);
 
 	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
 	const int exp_rcol = MAX((exp_width - 1 - 1) / 2 + 1, 0);
@@ -626,7 +626,7 @@ void t_expect_m(int passed, const char *func, int line, const char *act, size_t 
 
 static void print_str(int passed, const char *func, int line, const char *act, const char *exp, const char *cond, int llen, int rlen)
 {
-	const int exp_width = s_data.width - print_header(passed, func);
+	const int exp_width = s_data.width - print_header(passed, func, 0);
 
 	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
 	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
@@ -658,7 +658,7 @@ static void print_str(int passed, const char *func, int line, const char *act, c
 
 static void print_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, const char *cond, int llen, int rlen)
 {
-	const int exp_width = s_data.width - print_header(passed, func);
+	const int exp_width = s_data.width - print_header(passed, func, 0);
 
 	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
 	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
@@ -720,7 +720,7 @@ void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, 
 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 {
-	int len = print_header(passed, func);
+	int len = print_header(passed, func, 0);
 
 	va_list args;
 	va_start(args, fmt);
@@ -817,13 +817,13 @@ int t_expect_fstr_end(int passed, const char *func, int line)
 		act_line_end = s_data.buf_len;
 	}
 
-	const int exp_width = s_data.width - print_header(passed, func);
+	const int exp_width = s_data.width - print_header(passed, func, 0);
 
 	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
 
 	int act_app = 0;
 
-	print_header(passed, func);
+	print_header(passed, func, 1);
 
 	t_printf("\033[0;31m");
 
@@ -845,7 +845,7 @@ int t_expect_fstr_end(int passed, const char *func, int line)
 
 	t_printf("\033[0m\n");
 
-	print_header(passed, func);
+	print_header(passed, func, 1);
 
 	t_printf("\033[0;31mexp(%d): ", ln);
 	for (size_t i = 0; i < exp_line_end - line_start; i++) {
@@ -862,7 +862,7 @@ int t_expect_fstr_end(int passed, const char *func, int line)
 
 	t_printf("\033[0m\n");
 
-	print_header(passed, func);
+	print_header(passed, func, 1);
 
 	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 
