@@ -104,7 +104,7 @@ TEST(fail_test)
 	EXPECT_STR("a", "b");
 	EXPECT_STRN("ab", NULL, 1);
 	EXPECT_STRN("ab", "bc", 1);
-	EXPECT_WSTR(L"a", NULL);
+	EXPECT_WSTR(L"", NULL);
 	EXPECT_WSTR(L"a", L"b");
 	EXPECT_WSTRN(L"ab", NULL, 1);
 	EXPECT_WSTRN(L"ab", L"bc", 1);
@@ -433,38 +433,33 @@ TEST(fail_test)
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FMT-----------------------------------");
 
-	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
-	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
-	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
-	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
-	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
-	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
-	EXPECT_FMT("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 1, "a", &u);
-	EXPECT_FMT("a", 1, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &u);
+	EXPECT_FMT("\taaaaaaa", 1, "\ta", &u);
+	EXPECT_FMT("\ta", 1, "\taaaaaaa", &u);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STR-----------------------------------");
 
-	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
-	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
-	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
-	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-	EXPECT_STR("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
-	EXPECT_STR("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	EXPECT_STR("aaaaaaa", "a");
+	EXPECT_STR("a", "aaaaaaa");
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_STRN----------------------------------");
 
-	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 76);
-	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 76);
-	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 80);
-	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 80);
-	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 83);
-	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 83);
-	EXPECT_STRN("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a", 89);
-	EXPECT_STRN("a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 89);
+	EXPECT_STRN("\n\r\taaaaaaa", "\n\r\ta", 10);
+	EXPECT_STRN("\n\r\ta", "\n\r\taaaaaaa", 10);
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_WSTR-----------------------------------");
+
+	EXPECT_WSTR(L"aaaaaaa", L"a");
+	EXPECT_WSTR(L"a", L"aaaaaaa");
+	EXPECT_WSTR(L"a\n", L"b\n");
+
+	EXPECT_FAIL("%s", "");
+	EXPECT_FAIL("%s", "-----------------------------------EXPECT_WSTRN----------------------------------");
+
+	EXPECT_WSTRN(L"\n\r\taaaaaaa", L"\n\r\ta", 10);
+	EXPECT_WSTRN(L"\n\r\ta", L"\n\r\taaaaaaa", 10);
 
 	EXPECT_FAIL("%s", "");
 	EXPECT_FAIL("%s", "-----------------------------------EXPECT_FAIL----------------------------------");

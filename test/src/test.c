@@ -624,68 +624,202 @@ void t_expect_m(int passed, const char *func, int line, const char *act, size_t 
 	t_printf(" " BYTE_TO_BIN_PATTERN " L%d\033[0m\n", BYTE_TO_BIN(mask), line);
 }
 
-static void print_str(int passed, const char *func, int line, const char *act, const char *exp, const char *cond, int llen, int rlen)
+static void print_str(int passed, const char *func, int line, const char *act_str, const char *exp_str, size_t act_len, size_t exp_len)
 {
+	size_t ln	    = 0;
+	size_t col	    = 0;
+	size_t line_start   = 0;
+	size_t exp_line_end = 0;
+	size_t act_line_end = 0;
+	int diff	    = 0;
+
+	for (size_t i = 0; i < exp_len && i < act_len; i++) {
+		const char exp = exp_str[i];
+		const char act = act_str[i];
+
+		if (act != exp) {
+			diff = 1;
+		}
+
+		if (diff == 0) {
+			if (exp == '\n') {
+				col = 0;
+				ln++;
+				line_start = i + 1;
+			} else {
+				col++;
+			}
+		} else {
+			if (exp == '\n' && exp_line_end == 0) {
+				exp_line_end = i + 1;
+			}
+			if (act == '\n' && act_line_end == 0) {
+				act_line_end = i + 1;
+			}
+			if (exp_line_end != 0 && act_line_end != 0) {
+				break;
+			}
+		}
+	}
+
+	if (diff == 0 && exp_len == act_len) {
+		return;
+	}
+
+	if (exp_line_end == 0) {
+		exp_line_end = exp_len;
+	}
+	if (act_line_end == 0) {
+		act_line_end = act_len;
+	}
+
 	const int exp_width = s_data.width - print_header(passed, func, 0);
 
-	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
-	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
+	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
 
-	const int len = MAX(llen, rlen) * 2 + 4;
-	//const int act_col = llen + 4 + rlen;
+	int act_app = 0;
 
-	const int width = len < exp_lcol ? exp_lcol : exp_width;
-	const int a	= len < exp_lcol ? MAX(exp_rcol + 1, 0) : 0;
+	print_header(passed, func, 1);
 
-	const int exp_lval = MAX((width - 4) / 2, 0);
-	const int exp_rval = MAX((width - 4 - 1) / 2 + 1, 0);
+	t_printf("\033[0;31m");
 
-	int act_lval = MAX(llen, exp_lval);
-	int act_rval = MAX(rlen, exp_rval);
+	int h_len = t_printf("act(%d): ", ln);
 
-	int act_width = len < exp_lcol ? exp_width : act_lval + 4 + act_rval;
+	for (size_t i = 0; i < act_line_end - line_start; i++) {
+		char c = act_str[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n': t_printf("\\n"); act_app += (i <= col ? 1 : 0); break;
+		case '\r': t_printf("\\r"); act_app += (i <= col ? 1 : 0); break;
+		case '\t': t_printf("\\t"); act_app += (i <= col ? 1 : 0); break;
+		default: t_printf("%c", c); break;
+		}
+		// clang-format on
+	}
 
-	act_lval = act_width > exp_width ? llen : act_lval;
-	act_rval = act_width > exp_width ? rlen : act_rval;
+	int exp_app = 0;
 
-	act_width = len < exp_lcol ? exp_width : act_lval + 4 + act_rval;
+	t_printf("\033[0m\n");
 
-	const int over = MAX(act_width - exp_width, 0);
-	const int add  = MAX(9 - over, 0);
+	print_header(passed, func, 1);
 
-	t_printf("\033[0;31m%*s %s %-*s%*s L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
+	t_printf("\033[0;31mexp(%d): ", ln);
+	for (size_t i = 0; i < exp_line_end - line_start; i++) {
+		char c = exp_str[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n':t_printf("\\n"); exp_app += (i <= col ? 1 : 0); break;
+		case '\r':t_printf("\\r"); exp_app += (i <= col ? 1 : 0); break;
+		case '\t':t_printf("\\t"); exp_app += (i <= col ? 1 : 0); break;
+		default: t_printf("%c", c); break;
+		}
+		// clang-format on
+	}
+
+	t_printf("\033[0m\n");
+
+	print_header(passed, func, 1);
+
+	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 }
 
-static void print_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, const char *cond, int llen, int rlen)
+static void print_wstr(int passed, const char *func, int line, const wchar_t *act_str, const wchar_t *exp_str, size_t act_len, size_t exp_len)
 {
+	size_t ln	    = 0;
+	size_t col	    = 0;
+	size_t line_start   = 0;
+	size_t exp_line_end = 0;
+	size_t act_line_end = 0;
+	int diff	    = 0;
+
+	for (size_t i = 0; i < exp_len && i < act_len; i++) {
+		const wchar_t exp = exp_str[i];
+		const wchar_t act = act_str[i];
+
+		if (act != exp) {
+			diff = 1;
+		}
+
+		if (diff == 0) {
+			if (exp == '\n') {
+				col = 0;
+				ln++;
+				line_start = i + 1;
+			} else {
+				col++;
+			}
+		} else {
+			if (exp == '\n' && exp_line_end == 0) {
+				exp_line_end = i + 1;
+			}
+			if (act == '\n' && act_line_end == 0) {
+				act_line_end = i + 1;
+			}
+			if (exp_line_end != 0 && act_line_end != 0) {
+				break;
+			}
+		}
+	}
+
+	if (diff == 0 && exp_len == act_len) {
+		return;
+	}
+
+	if (exp_line_end == 0) {
+		exp_line_end = exp_len;
+	}
+	if (act_line_end == 0) {
+		act_line_end = act_len;
+	}
+
 	const int exp_width = s_data.width - print_header(passed, func, 0);
 
-	const int exp_lcol = MAX((exp_width - 1) / 2, 0);
-	const int exp_rcol = (exp_width - 1 - 1) / 2 + 1;
+	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
 
-	const int len = MAX(llen, rlen) * 2 + 4;
-	//const int act_col = llen + 4 + rlen;
+	int act_app = 0;
 
-	const int width = len < exp_lcol ? exp_lcol : exp_width;
-	const int a	= len < exp_lcol ? MAX(exp_rcol + 1, 0) : 0;
+	print_header(passed, func, 1);
 
-	const int exp_lval = MAX((width - 4) / 2, 0);
-	const int exp_rval = MAX((width - 4 - 1) / 2 + 1, 0);
+	t_printf("\033[0;31m");
 
-	int act_lval = MAX(llen, exp_lval);
-	int act_rval = MAX(rlen, exp_rval);
+	int h_len = t_printf("act(%d): ", ln);
 
-	int act_width = len < exp_lcol ? exp_width : act_lval + 4 + act_rval;
+	for (size_t i = 0; i < act_line_end - line_start; i++) {
+		wchar_t c = act_str[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n': t_wprintf(L"\\n"); act_app += (i <= col ? 1 : 0); break;
+		case '\r': t_wprintf(L"\\r"); act_app += (i <= col ? 1 : 0); break;
+		case '\t': t_wprintf(L"\\t"); act_app += (i <= col ? 1 : 0); break;
+		default: t_wprintf(L"%c", c); break;
+		}
+		// clang-format on
+	}
 
-	act_lval = act_width > exp_width ? llen : act_lval;
-	act_rval = act_width > exp_width ? rlen : act_rval;
+	int exp_app = 0;
 
-	act_width = len < exp_lcol ? exp_width : act_lval + 4 + act_rval;
+	t_printf("\033[0m\n");
 
-	const int over = MAX(act_width - exp_width, 0);
-	const int add  = MAX(9 - over, 0);
+	print_header(passed, func, 1);
 
-	t_wprintf(L"\033[0;31m%*s %hs %-*s%*hs L%d\033[0m\n", act_lval, act, cond, act_rval, exp, a + add, "", line);
+	t_printf("\033[0;31mexp(%d): ", ln);
+	for (size_t i = 0; i < exp_line_end - line_start; i++) {
+		wchar_t c = exp_str[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n':t_wprintf(L"\\n"); exp_app += (i <= col ? 1 : 0); break;
+		case '\r':t_wprintf(L"\\r"); exp_app += (i <= col ? 1 : 0); break;
+		case '\t':t_wprintf(L"\\t"); exp_app += (i <= col ? 1 : 0); break;
+		default: t_wprintf(L"%c", c); break;
+		}
+		// clang-format on
+	}
+
+	t_printf("\033[0m\n");
+
+	print_header(passed, func, 1);
+
+	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 }
 
 void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...)
@@ -695,27 +829,27 @@ void t_expect_fmt(int passed, const char *func, int line, const char *act, unsig
 	const char *exp = va_arg(args, const char *);
 	va_end(args);
 
-	print_str(passed, func, line, act, exp, "~=", (int)strlen(act), (int)strlen(exp));
+	print_str(passed, func, line, act, exp, (int)strlen(act), (int)strlen(exp));
 }
 
 void t_expect_str(int passed, const char *func, int line, const char *act, const char *exp)
 {
-	print_str(passed, func, line, act, exp, "==", act == NULL ? 0 : (int)strlen(act), exp == NULL ? 0 : (int)strlen(exp));
+	print_str(passed, func, line, act, exp, act == NULL ? 0 : (int)strlen(act), exp == NULL ? 0 : (int)strlen(exp));
 }
 
 void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len)
 {
-	print_str(passed, func, line, act, exp, "==", (int)MIN(len, act == NULL ? 0 : strlen(act)), (int)MIN(len, exp == NULL ? 0 : strlen(exp)));
+	print_str(passed, func, line, act, exp, (int)MIN(len, act == NULL ? 0 : strlen(act)), (int)MIN(len, exp == NULL ? 0 : strlen(exp)));
 }
 
 void t_expect_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp)
 {
-	print_wstr(passed, func, line, act, exp, "==", act == NULL ? 0 : (int)wcslen(act), exp == NULL ? 0 : (int)wcslen(exp));
+	print_wstr(passed, func, line, act, exp, act == NULL ? 0 : (int)wcslen(act), exp == NULL ? 0 : (int)wcslen(exp));
 }
 
 void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len)
 {
-	print_wstr(passed, func, line, act, exp, "==", (int)MIN(len, act == NULL ? 0 : wcslen(act)), (int)MIN(len, exp == NULL ? 0 : wcslen(exp)));
+	print_wstr(passed, func, line, act, exp, (int)MIN(len, act == NULL ? 0 : wcslen(act)), (int)MIN(len, exp == NULL ? 0 : wcslen(exp)));
 }
 
 void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
@@ -766,105 +900,11 @@ void t_expect_fstr_start(const char *exp, size_t len)
 
 int t_expect_fstr_end(int passed, const char *func, int line)
 {
-	(void)passed;
-	(void)func;
-	(void)line;
+	const int ret = t_strcmp(s_data.buf, s_data.exp);
 
-	size_t ln	    = 0;
-	size_t col	    = 0;
-	size_t line_start   = 0;
-	size_t exp_line_end = 0;
-	size_t act_line_end = 0;
-	int diff	    = 0;
-
-	for (size_t i = 0; i < s_data.exp_len && i < s_data.buf_len; i++) {
-		const char exp = s_data.exp[i];
-		const char act = s_data.buf[i];
-
-		if (act != exp) {
-			diff = 1;
-		}
-
-		if (diff == 0) {
-			if (exp == '\n') {
-				col = 0;
-				ln++;
-				line_start = i + 1;
-			} else {
-				col++;
-			}
-		} else {
-			if (exp == '\n' && exp_line_end == 0) {
-				exp_line_end = i + 1;
-			}
-			if (act == '\n' && act_line_end == 0) {
-				act_line_end = i + 1;
-			}
-			if (exp_line_end != 0 && act_line_end != 0) {
-				break;
-			}
-		}
+	if (ret != 0) {
+		print_str(passed, func, line, s_data.buf, s_data.exp, s_data.buf_len, s_data.exp_len);
 	}
 
-	if (diff == 0 && s_data.exp_len == s_data.buf_len) {
-		return 0;
-	}
-
-	if (exp_line_end == 0) {
-		exp_line_end = s_data.exp_len;
-	}
-	if (act_line_end == 0) {
-		act_line_end = s_data.buf_len;
-	}
-
-	const int exp_width = s_data.width - print_header(passed, func, 0);
-
-	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
-
-	int act_app = 0;
-
-	print_header(passed, func, 1);
-
-	t_printf("\033[0;31m");
-
-	int h_len = t_printf("act(%d): ", ln);
-
-	for (size_t i = 0; i < act_line_end - line_start; i++) {
-		char c = s_data.buf[line_start + i];
-		// clang-format off
-		switch (c) {
-		case '\n': t_printf("\\n"); act_app += (i <= col ? 1 : 0); break;
-		case '\r': t_printf("\\r"); act_app += (i <= col ? 1 : 0); break;
-		case '\t': t_printf("\\t"); act_app += (i <= col ? 1 : 0); break;
-		default: t_printf("%c", c); break;
-		}
-		// clang-format on
-	}
-
-	int exp_app = 0;
-
-	t_printf("\033[0m\n");
-
-	print_header(passed, func, 1);
-
-	t_printf("\033[0;31mexp(%d): ", ln);
-	for (size_t i = 0; i < exp_line_end - line_start; i++) {
-		char c = s_data.exp[line_start + i];
-		// clang-format off
-		switch (c) {
-		case '\n':t_printf("\\n"); exp_app += (i <= col ? 1 : 0); break;
-		case '\r':t_printf("\\r"); exp_app += (i <= col ? 1 : 0); break;
-		case '\t':t_printf("\\t"); exp_app += (i <= col ? 1 : 0); break;
-		default: t_printf("%c", c); break;
-		}
-		// clang-format on
-	}
-
-	t_printf("\033[0m\n");
-
-	print_header(passed, func, 1);
-
-	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
-
-	return 1;
+	return ret;
 }
