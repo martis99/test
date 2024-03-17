@@ -1,6 +1,8 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include "print.h"
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <wchar.h>
@@ -13,15 +15,13 @@ int t_run(test_fn fn, int print);
 
 typedef int (*setup_fn)(void *priv);
 typedef int (*teardown_fn)(void *priv);
-typedef int (*print_fn)(const char *fmt, va_list args);
-typedef int (*wprint_fn)(const wchar_t *fmt, va_list args);
 
 void t_set_priv(void *priv);
 void t_setup(setup_fn setup);
 void t_teardown(teardown_fn teardown);
 
-void t_set_print(print_fn print);
-void t_set_wprint(wprint_fn wprint);
+void t_set_print(c_printv_fn print);
+void t_set_wprint(c_wprintv_fn wprint);
 
 void *t_get_priv();
 

@@ -1,5 +1,7 @@
 #include "test_test.h"
 
+#include "test_cplatform.h"
+
 #include "type.h"
 
 #include "test.h"
@@ -13,8 +15,8 @@ typedef struct tdata_s {
 	void *priv;
 	setup_fn setup;
 	setup_fn teardown;
-	print_fn print;
-	wprint_fn wprint;
+	c_printv_fn print;
+	c_wprintv_fn wprint;
 	int width;
 	long long passed;
 	long long failed;
@@ -669,6 +671,7 @@ TEST(tests)
 
 int test_test()
 {
+	test_cplatform();
 	tests();
 
 	tdata_t tdata = t_get_data();

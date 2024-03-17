@@ -1,32 +1,13 @@
 #include "test.h"
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	#define T_WIN
-	#if defined(_WIN64)
-		#define T_WIN64
-	#else
-		#define T_WIN32
-	#endif
-#elif __linux__
-	#define T_LINUX
-#else
-	#error "Platform not supported"
-#endif
+#include "platform.h"
 
-#include <assert.h>
-#include <errno.h>
-#include <fcntl.h>
-#if defined(T_WIN)
-	#include <io.h>
-#endif
-#include <inttypes.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(T_WIN)
-	#define vprintf vprintf_s
+#if defined(C_WIN)
 	#define vsscanf vsscanf_s
 #endif
 
@@ -48,8 +29,8 @@ typedef struct tdata_s {
 	void *priv;
 	setup_fn setup;
 	setup_fn teardown;
-	print_fn print;
-	wprint_fn wprint;
+	c_printv_fn print;
+	c_wprintv_fn wprint;
 	int width;
 	long long passed;
 	long long failed;
@@ -73,27 +54,9 @@ void t_set_data(tdata_t data)
 	s_data = data;
 }
 
-static FILE *t_freopen(const char *path, const char *mode, FILE *file)
-{
-#if defined(T_WIN)
-	freopen_s(&file, path, mode, file);
-#else
-	file = freopen(path, mode, file);
-#endif
-	return file;
-}
-
 static int t_printv(const char *fmt, va_list args)
 {
-	va_list copy;
-	va_copy(copy, args);
-	int ret = s_data.print ? s_data.print(fmt, copy) : 0;
-	if (ret < 0 && errno == 0) {
-		t_freopen(NULL, "w", stdout);
-		ret = s_data.print ? s_data.print(fmt, copy) : 0;
-	}
-	va_end(copy);
-	return ret;
+	return s_data.print ? s_data.print(NULL, 0, 0, fmt, args) : 0;
 }
 
 static int t_printf(const char *fmt, ...)
@@ -107,16 +70,7 @@ static int t_printf(const char *fmt, ...)
 
 static int t_wprintv(const wchar_t *fmt, va_list args)
 {
-	va_list copy;
-	va_copy(copy, args);
-	errno	= 0;
-	int ret = s_data.wprint ? s_data.wprint(fmt, copy) : 0;
-	if (ret < 0 && errno == 0) {
-		t_freopen(NULL, "w", stdout);
-		ret = s_data.wprint ? s_data.wprint(fmt, copy) : 0;
-	}
-	va_end(copy);
-	return ret;
+	return s_data.wprint ? s_data.wprint(NULL, 0, 0, fmt, args) : 0;
 }
 
 static int t_wprintf(const wchar_t *fmt, ...)
@@ -143,12 +97,12 @@ void t_teardown(teardown_fn teardown)
 	s_data.teardown = teardown;
 }
 
-void t_set_print(print_fn print)
+void t_set_print(c_printv_fn print)
 {
 	s_data.print = print;
 }
 
-void t_set_wprint(wprint_fn wprint)
+void t_set_wprint(c_wprintv_fn wprint)
 {
 	s_data.wprint = wprint;
 }
@@ -158,58 +112,28 @@ void *t_get_priv()
 	return s_data.priv;
 }
 
-static inline void t_sprint()
-{
-#if defined(T_WIN)
-	fflush(stdout);
-	int r = _setmode(_fileno(stdout), _O_WTEXT);
-#endif
-}
-
-static inline void t_eprint()
-{
-#if defined(T_WIN)
-	fflush(stdout);
-	int r = _setmode(_fileno(stdout), _O_TEXT);
-#endif
-}
-
 static inline int pur()
 {
-#if defined(T_WIN)
-	return t_wprintf(L"└─");
-#else
-	t_printf("└─");
+	int ret = c_ur(s_data.print, 0, 0, NULL);
 	return 2;
-#endif
 }
 
 static inline int pv()
 {
-#if defined(T_WIN)
-	return t_wprintf(L"│ ");
-#else
-	t_printf("│ ");
+	int ret = c_v(s_data.print, 0, 0, NULL);
 	return 2;
-#endif
 }
 
 static inline int pvr()
 {
-#if defined(T_WIN)
-	return t_wprintf(L"├─");
-#else
-	t_printf("├─");
+	int ret = c_vr(s_data.print, 0, 0, NULL);
 	return 2;
-#endif
 }
 
 void t_init(int width)
 {
-	t_sprint();
-
-	s_data.print  = vprintf;
-	s_data.wprint = vwprintf;
+	s_data.print  = c_printv_cb;
+	s_data.wprint = c_wprintv_cb;
 
 	s_data.width  = width;
 	s_data.passed = 0;
@@ -268,13 +192,11 @@ int t_end(int passed, const char *func)
 		s_data.teardown(s_data.priv);
 	}
 	if (passed) {
-		t_sprint();
 		int len = 0;
 		for (int i = 0; i < s_data.depth; i++) {
 			len += pv();
 		}
 		len += pvr();
-		t_eprint();
 
 		t_printf("\033[0;32m%-*s          OK\033[0m\n", s_data.width - len, func);
 
@@ -288,14 +210,12 @@ int t_end(int passed, const char *func)
 
 void t_sstart(const char *func)
 {
-	t_sprint();
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
 	}
 	if (s_data.depth >= 0) {
 		pvr();
 	}
-	t_eprint();
 
 	t_printf("%s\n", func);
 	s_data.depth++;
@@ -303,12 +223,10 @@ void t_sstart(const char *func)
 
 int t_send(int passed, int failed)
 {
-	t_sprint();
 	for (int i = 0; i < s_data.depth; i++) {
 		pv();
 	}
 	pur();
-	t_eprint();
 	if (failed == 0) {
 		t_printf("\033[0;32mPASSED %d %s\033[0m\n", passed, passed == 1 ? "TEST" : "TESTS");
 	} else {
@@ -373,25 +291,19 @@ int t_wstrncmp(const wchar_t *act, const wchar_t *exp, size_t len)
 
 static int print_header(int passed, const char *func, int child)
 {
-	t_sprint();
 	if (passed && child == 0) {
 		int len = 0;
 		for (int i = 0; i < s_data.depth; i++) {
 			len += pv();
 		}
 		len += pvr();
-#if defined(T_WIN)
-		t_wprintf(L"\033[0;31m%-*hs          FAILED\033[0m\n", s_data.width - len, func);
-#else
 		t_printf("\033[0;31m%-*s          FAILED\033[0m\n", s_data.width - len, func);
-#endif
 	}
 	int len = 0;
 	for (int i = 0; i < s_data.depth; i++) {
 		len += pv();
 	}
 	len += pv();
-	t_eprint();
 	return len;
 }
 

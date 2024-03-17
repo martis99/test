@@ -1,6 +1,6 @@
 NAME: test
 LANGS: C
-DIRS: test, examples, tests
+DIRS: cplatform, test, examples, tests
 STARTUP: test_test
 CONFIGS: Debug, Release
 PLATFORMS: x64, x86
