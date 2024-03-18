@@ -15,8 +15,8 @@ typedef struct tdata_s {
 	void *priv;
 	setup_fn setup;
 	setup_fn teardown;
-	c_printv_fn print;
-	c_wprintv_fn wprint;
+	print_dst_t print;
+	wprint_dst_t wprint;
 	int width;
 	long long passed;
 	long long failed;
@@ -544,8 +544,8 @@ TEST(t_t_setup_teardown)
 
 	tdata_t tdata = t_get_data();
 
-	t_set_print(NULL);
-	t_set_wprint(NULL);
+	t_set_print(PRINT_DST_NONE());
+	t_set_wprint(PRINT_DST_WNONE());
 
 	t_setup(setup);
 	t_teardown(teardown);
@@ -564,8 +564,8 @@ TEST(t_t_expect)
 
 	tdata_t tdata = t_get_data();
 
-	t_set_print(NULL);
-	t_set_wprint(NULL);
+	t_set_print(PRINT_DST_NONE());
+	t_set_wprint(PRINT_DST_WNONE());
 
 	t_expect_g(1, __func__, __LINE__, "", 2, "", 0, "==");
 	t_expect_g(1, __func__, __LINE__, "", 4, "", 3, "==");
@@ -602,8 +602,8 @@ TEST(t_t_set_print)
 	START;
 	tdata_t tdata = t_get_data();
 
-	t_set_print(t_print_cb);
-	t_set_wprint(t_wprint_cb);
+	t_set_print(PRINT_DST_STD());
+	t_set_wprint(PRINT_DST_WSTD());
 
 	EXPECT_STR("a", "b");
 	EXPECT_WSTR(L"a", L"b");
@@ -619,8 +619,8 @@ TEST(t_t_send)
 
 	tdata_t tdata = t_get_data();
 
-	t_set_print(NULL);
-	t_set_wprint(NULL);
+	t_set_print(PRINT_DST_NONE());
+	t_set_wprint(PRINT_DST_WNONE());
 
 	t_send(0, 0);
 	t_send(0, 1);
@@ -640,8 +640,8 @@ TEST(t_t_finish)
 
 	tdata.buf = malloc(tdata.buf_size);
 
-	t_set_print(NULL);
-	t_set_wprint(NULL);
+	t_set_print(PRINT_DST_NONE());
+	t_set_wprint(PRINT_DST_WNONE());
 
 	t_set_data(tdata);
 

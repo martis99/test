@@ -29,8 +29,8 @@ typedef struct tdata_s {
 	void *priv;
 	setup_fn setup;
 	setup_fn teardown;
-	c_printv_fn print;
-	c_wprintv_fn wprint;
+	print_dst_t print;
+	wprint_dst_t wprint;
 	int width;
 	long long passed;
 	long long failed;
@@ -56,7 +56,7 @@ void t_set_data(tdata_t data)
 
 static int t_printv(const char *fmt, va_list args)
 {
-	return s_data.print ? s_data.print(NULL, 0, 0, fmt, args) : 0;
+	return c_print_execv(s_data.print, fmt, args);
 }
 
 static int t_printf(const char *fmt, ...)
@@ -68,9 +68,9 @@ static int t_printf(const char *fmt, ...)
 	return ret;
 }
 
-static int t_wprintv(const wchar_t *fmt, va_list args)
+static int t_wprintv(const wchar *fmt, va_list args)
 {
-	return s_data.wprint ? s_data.wprint(NULL, 0, 0, fmt, args) : 0;
+	return c_wprint_execv(s_data.wprint, fmt, args);
 }
 
 static int t_wprintf(const wchar_t *fmt, ...)
@@ -97,17 +97,17 @@ void t_teardown(teardown_fn teardown)
 	s_data.teardown = teardown;
 }
 
-c_printv_fn t_set_print(c_printv_fn print)
+print_dst_t t_set_print(print_dst_t print)
 {
-	c_printv_fn cur = s_data.print;
-	s_data.print = print;
+	print_dst_t cur = s_data.print;
+	s_data.print	= print;
 	return cur;
 }
 
-c_wprintv_fn t_set_wprint(c_wprintv_fn wprint)
+wprint_dst_t t_set_wprint(wprint_dst_t wprint)
 {
-	c_wprintv_fn cur = s_data.wprint;
-	s_data.wprint = wprint;
+	wprint_dst_t cur = s_data.wprint;
+	s_data.wprint	 = wprint;
 	return cur;
 }
 
@@ -118,26 +118,26 @@ void *t_get_priv()
 
 static inline int pur()
 {
-	int ret = c_ur(s_data.print, 0, 0, NULL);
+	c_ur(s_data.print);
 	return 2;
 }
 
 static inline int pv()
 {
-	int ret = c_v(s_data.print, 0, 0, NULL);
+	c_v(s_data.print);
 	return 2;
 }
 
 static inline int pvr()
 {
-	int ret = c_vr(s_data.print, 0, 0, NULL);
+	c_vr(s_data.print);
 	return 2;
 }
 
 void t_init(int width)
 {
-	s_data.print  = c_printv_cb;
-	s_data.wprint = c_wprintv_cb;
+	s_data.print  = PRINT_DST_STD();
+	s_data.wprint = PRINT_DST_WSTD();
 
 	s_data.width  = width;
 	s_data.passed = 0;
@@ -165,12 +165,12 @@ int t_finish()
 
 int t_run(test_fn fn, int print)
 {
-	c_printv_fn printfn = NULL;
-	c_wprintv_fn wprintfn = NULL;
+	print_dst_t printfn   = { 0 };
+	wprint_dst_t wprintfn = { 0 };
 
 	if (print == 0) {
-		printfn = t_set_print(NULL);
-		wprintfn = t_set_wprint(NULL);
+		printfn	 = t_set_print(PRINT_DST_NONE());
+		wprintfn = t_set_wprint(PRINT_DST_WNONE());
 	}
 
 	int ret = fn();
