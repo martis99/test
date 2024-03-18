@@ -577,33 +577,13 @@ TEST(t_t_expect)
 	END;
 }
 
-int t_print_cb(void *stream, size_t size, int off, const char *fmt, va_list args)
-{
-	(void)stream;
-	(void)size;
-	(void)off;
-	(void)fmt;
-	(void)args;
-	return -1;
-}
-
-int t_wprint_cb(void *stream, size_t size, int off, const wchar *fmt, va_list args)
-{
-	(void)stream;
-	(void)size;
-	(void)off;
-	(void)fmt;
-	(void)args;
-	return -1;
-}
-
 TEST(t_t_set_print)
 {
 	START;
 	tdata_t tdata = t_get_data();
 
-	t_set_print(PRINT_DST_STD());
-	t_set_wprint(PRINT_DST_WSTD());
+	t_set_print(PRINT_DST_NONE());
+	t_set_wprint(PRINT_DST_WNONE());
 
 	EXPECT_STR("a", "b");
 	EXPECT_WSTR(L"a", L"b");
