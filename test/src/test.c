@@ -97,14 +97,18 @@ void t_teardown(teardown_fn teardown)
 	s_data.teardown = teardown;
 }
 
-void t_set_print(c_printv_fn print)
+c_printv_fn t_set_print(c_printv_fn print)
 {
+	c_printv_fn cur = s_data.print;
 	s_data.print = print;
+	return cur;
 }
 
-void t_set_wprint(c_wprintv_fn wprint)
+c_wprintv_fn t_set_wprint(c_wprintv_fn wprint)
 {
+	c_wprintv_fn cur = s_data.wprint;
 	s_data.wprint = wprint;
+	return cur;
 }
 
 void *t_get_priv()
@@ -161,19 +165,19 @@ int t_finish()
 
 int t_run(test_fn fn, int print)
 {
-	tdata_t tdata;
+	c_printv_fn printfn = NULL;
+	c_wprintv_fn wprintfn = NULL;
 
 	if (print == 0) {
-		tdata = t_get_data();
-
-		t_set_print(NULL);
-		t_set_wprint(NULL);
+		printfn = t_set_print(NULL);
+		wprintfn = t_set_wprint(NULL);
 	}
 
 	int ret = fn();
 
 	if (print == 0) {
-		t_set_data(tdata);
+		t_set_print(printfn);
+		t_set_wprint(wprintfn);
 	}
 
 	return ret;
