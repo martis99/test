@@ -577,15 +577,21 @@ TEST(t_t_expect)
 	END;
 }
 
-int t_print_cb(const char *fmt, va_list args)
+int t_print_cb(void *stream, size_t size, int off, const char *fmt, va_list args)
 {
+	(void)stream;
+	(void)size;
+	(void)off;
 	(void)fmt;
 	(void)args;
 	return -1;
 }
 
-int t_wprint_cb(const wchar_t *fmt, va_list args)
+int t_wprint_cb(void *stream, size_t size, int off, const wchar *fmt, va_list args)
 {
+	(void)stream;
+	(void)size;
+	(void)off;
 	(void)fmt;
 	(void)args;
 	return -1;
