@@ -56,7 +56,7 @@ void t_set_data(tdata_t data)
 
 static int t_printv(const char *fmt, va_list args)
 {
-	return c_print_execv(s_data.print, fmt, args);
+	return dprintv(s_data.print, fmt, args);
 }
 
 static int t_printf(const char *fmt, ...)
@@ -70,7 +70,7 @@ static int t_printf(const char *fmt, ...)
 
 static int t_wprintv(const wchar *fmt, va_list args)
 {
-	return c_wprint_execv(s_data.wprint, fmt, args);
+	return dwprintv(s_data.wprint, fmt, args);
 }
 
 static int t_wprintf(const wchar_t *fmt, ...)
@@ -118,19 +118,19 @@ void *t_get_priv()
 
 static inline int pur()
 {
-	c_ur(s_data.print);
+	t_printf("└─");
 	return 2;
 }
 
 static inline int pv()
 {
-	c_v(s_data.print);
+	t_printf("│ ");
 	return 2;
 }
 
 static inline int pvr()
 {
-	c_vr(s_data.print);
+	t_printf("├─");
 	return 2;
 }
 
