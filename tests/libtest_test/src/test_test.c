@@ -468,6 +468,7 @@ TEST(fail_test)
 					    "Duis aute irure dolor in res"),
 			    exp, sizeof(exp) - 1);
 	}
+	_passed = 1;
 	END;
 }
 
@@ -580,6 +581,7 @@ TEST(t_t_expect)
 TEST(t_t_set_print)
 {
 	START;
+
 	tdata_t tdata = t_get_data();
 
 	t_set_print(PRINT_DST_NONE());
@@ -589,6 +591,7 @@ TEST(t_t_set_print)
 	EXPECT_WSTR(L"a", L"b");
 
 	t_set_data(tdata);
+	_passed = 1;
 
 	END;
 }
@@ -615,19 +618,20 @@ TEST(t_t_finish)
 	START;
 
 	tdata_t tdata = t_get_data();
+	tdata_t tmp   = tdata;
 
-	char *buf = tdata.buf;
+	tmp.print  = PRINT_DST_NONE();
+	tmp.wprint = PRINT_DST_WNONE();
 
-	tdata.buf = malloc(tdata.buf_size);
-
-	t_set_print(PRINT_DST_NONE());
-	t_set_wprint(PRINT_DST_WNONE());
-
-	t_set_data(tdata);
-
+	tmp.failed = 1;
+	tmp.buf	   = malloc(tmp.buf_size);
+	t_set_data(tmp);
 	t_finish();
 
-	tdata.buf = buf;
+	tmp.failed = 0;
+	tmp.buf	   = malloc(tmp.buf_size);
+	t_set_data(tmp);
+	t_finish();
 
 	t_set_data(tdata);
 
@@ -659,11 +663,6 @@ int test_test()
 {
 	test_cplatform();
 	tests();
-
-	tdata_t tdata = t_get_data();
-	tdata.passed += tdata.failed;
-	tdata.failed = 0;
-	t_set_data(tdata);
 
 	return 0;
 }
