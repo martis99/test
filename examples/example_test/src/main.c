@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SEP "\n------%s------\n\n"
+#define SEC "\n------%s------\n\n"
 
 TEST(success_test)
 {
@@ -77,27 +77,27 @@ int main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	printf(SEP, "main");
+	printf(SEC, "main");
 	t_init(80);
 	t_run(tests, 1);
 	t_finish();
 
-	printf(SEP, "single");
+	printf(SEC, "single");
 	single();
 
-	printf(SEP, "multiple");
+	printf(SEC, "multiple");
 	multiple();
 
-	printf(SEP, "parameterized");
+	printf(SEC, "parameterized");
 	parameterized();
 
-	printf(SEP, "multilevel");
+	printf(SEC, "multilevel");
 	multilevel();
 
-	printf(SEP, "separated");
+	printf(SEC, "separated");
 	separated();
 
-	printf(SEP, "setup_teardown");
+	printf(SEC, "setup_teardown");
 	setup_teardown();
 
 	return 0;
