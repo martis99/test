@@ -311,47 +311,28 @@ static int print_header(int passed, const char *func, int child)
 	return len;
 }
 
-static char get_char(size_t size, va_list args)
-{
-	(void)size;
-	return (char)va_arg(args, int);
-}
+// clang-format off
+#define get_char(_size, _args) \
+	(char)va_arg(_args, int)
 
-static short get_short(size_t size, va_list args)
-{
-	switch (size) {
-	case 1: return (short)va_arg(args, int);
-	case 2: return (short)va_arg(args, int);
-	}
+#define get_short(_size, _args)                  \
+	_size == 1 ? (short)va_arg(_args, int) : \
+	_size == 2 ? (short)va_arg(_args, int) : \
+		     0
 
-	t_printf("Unsupported type of size: %zu\n", size);
-	return 0;
-}
+#define get_int(_size, _args)                  \
+	_size == 1 ? (int)va_arg(_args, int) : \
+	_size == 2 ? (int)va_arg(_args, int) : \
+	_size == 4 ? (int)va_arg(_args, int) : \
+		     0
+// clang-format on
 
-static int get_int(size_t size, va_list args)
-{
-	switch (size) {
-	case 1: return (int)va_arg(args, int);
-	case 2: return (int)va_arg(args, int);
-	case 4: return (int)va_arg(args, int);
-	}
-
-	t_printf("Unsupported type of size: %zu\n", size);
-	return 0;
-}
-
-static long long get_long(size_t size, va_list args)
-{
-	switch (size) {
-	case 1: return (long long)va_arg(args, int);
-	case 2: return (long long)va_arg(args, int);
-	case 4: return (long long)va_arg(args, int);
-	case 8: return (long long)va_arg(args, long long);
-	}
-
-	t_printf("Unsupported type of size: %zu\n", size);
-	return 0;
-}
+#define get_long(_size, _args)                             \
+	_size == 1 ? (long long)va_arg(_args, int) :       \
+	_size == 2 ? (long long)va_arg(_args, int) :       \
+	_size == 4 ? (long long)va_arg(_args, int) :       \
+	_size == 8 ? (long long)va_arg(_args, long long) : \
+		     0
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
