@@ -573,34 +573,11 @@ static void print_str(int passed, const char *func, int line, const char *act_st
 	const int exp_width = s_data.width - print_header(passed, func, 0);
 
 	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
-
-	int act_app = 0;
-
 	print_header(passed, func, 1);
-
 	t_printf("\033[0;31m");
 
-	int h_len = t_printf("act(%d): ", ln);
-
-	for (size_t i = 0; i < act_line_end - line_start; i++) {
-		char c = act_str[line_start + i];
-		// clang-format off
-		switch (c) {
-		case '\n': t_printf("\\n"); act_app += (i <= col ? 1 : 0); break;
-		case '\r': t_printf("\\r"); act_app += (i <= col ? 1 : 0); break;
-		case '\t': t_printf("\\t"); act_app += (i <= col ? 1 : 0); break;
-		default: t_printf("%c", c); break;
-		}
-		// clang-format on
-	}
-
 	int exp_app = 0;
-
-	t_printf("\033[0m\n");
-
-	print_header(passed, func, 1);
-
-	t_printf("\033[0;31mexp(%d): ", ln);
+	t_printf("exp(%d): ", ln);
 	for (size_t i = 0; i < exp_line_end - line_start; i++) {
 		char c = exp_str[line_start + i];
 		// clang-format off
@@ -614,9 +591,25 @@ static void print_str(int passed, const char *func, int line, const char *act_st
 	}
 
 	t_printf("\033[0m\n");
-
 	print_header(passed, func, 1);
+	t_printf("\033[0;31m");
 
+	int act_app = 0;
+	int h_len   = t_printf("act(%d): ", ln);
+	for (size_t i = 0; i < act_line_end - line_start; i++) {
+		char c = act_str[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n': t_printf("\\n"); act_app += (i <= col ? 1 : 0); break;
+		case '\r': t_printf("\\r"); act_app += (i <= col ? 1 : 0); break;
+		case '\t': t_printf("\\t"); act_app += (i <= col ? 1 : 0); break;
+		default: t_printf("%c", c); break;
+		}
+		// clang-format on
+	}
+
+	t_printf("\033[0m\n");
+	print_header(passed, func, 1);
 	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 }
 
@@ -672,34 +665,11 @@ static void print_wstr(int passed, const char *func, int line, const wchar_t *ac
 	const int exp_width = s_data.width - print_header(passed, func, 0);
 
 	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
-
-	int act_app = 0;
-
 	print_header(passed, func, 1);
-
 	t_printf("\033[0;31m");
 
-	int h_len = t_printf("act(%d): ", ln);
-
-	for (size_t i = 0; i < act_line_end - line_start; i++) {
-		wchar_t c = act_str[line_start + i];
-		// clang-format off
-		switch (c) {
-		case '\n': t_wprintf(L"\\n"); act_app += (i <= col ? 1 : 0); break;
-		case '\r': t_wprintf(L"\\r"); act_app += (i <= col ? 1 : 0); break;
-		case '\t': t_wprintf(L"\\t"); act_app += (i <= col ? 1 : 0); break;
-		default: t_wprintf(L"%c", c); break;
-		}
-		// clang-format on
-	}
-
 	int exp_app = 0;
-
-	t_printf("\033[0m\n");
-
-	print_header(passed, func, 1);
-
-	t_printf("\033[0;31mexp(%d): ", ln);
+	t_printf("exp(%d): ", ln);
 	for (size_t i = 0; i < exp_line_end - line_start; i++) {
 		wchar_t c = exp_str[line_start + i];
 		// clang-format off
@@ -713,9 +683,25 @@ static void print_wstr(int passed, const char *func, int line, const wchar_t *ac
 	}
 
 	t_printf("\033[0m\n");
-
 	print_header(passed, func, 1);
+	t_printf("\033[0;31m");
 
+	int act_app = 0;
+	int h_len   = t_printf("act(%d): ", ln);
+	for (size_t i = 0; i < act_line_end - line_start; i++) {
+		wchar_t c = act_str[line_start + i];
+		// clang-format off
+		switch (c) {
+		case '\n': t_wprintf(L"\\n"); act_app += (i <= col ? 1 : 0); break;
+		case '\r': t_wprintf(L"\\r"); act_app += (i <= col ? 1 : 0); break;
+		case '\t': t_wprintf(L"\\t"); act_app += (i <= col ? 1 : 0); break;
+		default: t_wprintf(L"%c", c); break;
+		}
+		// clang-format on
+	}
+
+	t_printf("\033[0m\n");
+	print_header(passed, func, 1);
 	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 }
 
