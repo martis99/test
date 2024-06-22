@@ -577,7 +577,7 @@ static void print_str(int passed, const char *func, int line, const char *act_st
 	t_printf("\033[0;31m");
 
 	int exp_app = 0;
-	t_printf("exp(%d): ", ln);
+	t_printf("exp:%d: ", ln);
 	for (size_t i = 0; i < exp_line_end - line_start; i++) {
 		char c = exp_str[line_start + i];
 		// clang-format off
@@ -595,7 +595,7 @@ static void print_str(int passed, const char *func, int line, const char *act_st
 	t_printf("\033[0;31m");
 
 	int act_app = 0;
-	int h_len   = t_printf("act(%d): ", ln);
+	int h_len   = t_printf("act:%d: ", ln);
 	for (size_t i = 0; i < act_line_end - line_start; i++) {
 		char c = act_str[line_start + i];
 		// clang-format off
