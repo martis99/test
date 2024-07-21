@@ -57,6 +57,10 @@ int t_fprintf(void *priv, const char *fmt, ...);
 void t_expect_fstr_start(const char *exp, size_t len);
 int t_expect_fstr_end(int passed, const char *func, int line);
 
+//Declare subtest
+#define STEST(_name)	   int _name()
+#define STESTP(_name, ...) int _name(__VA_ARGS__)
+
 //Declare test
 #define TEST(_name)	  static inline int _name()
 #define TESTP(_name, ...) static inline int _name(__VA_ARGS__)

@@ -1,10 +1,8 @@
 #include "test_test.h"
 
-#include "test_cplatform.h"
-
-#include "type.h"
-
 #include "test.h"
+#include "test_cplatform.h"
+#include "type.h"
 
 #include <memory.h>
 #include <stdio.h>
