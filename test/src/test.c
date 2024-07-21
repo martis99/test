@@ -1,5 +1,6 @@
 #include "test.h"
 
+#include "mem.h"
 #include "platform.h"
 
 #include <memory.h>
@@ -40,6 +41,7 @@ typedef struct tdata_s {
 	size_t buf_len;
 	const char *exp;
 	size_t exp_len;
+	size_t mem;
 } tdata_t;
 
 static tdata_t s_data;
@@ -185,6 +187,8 @@ int t_run(test_fn fn, int print)
 
 void t_start()
 {
+	s_data.mem = mem_get()->mem;
+
 	if (s_data.setup) {
 		s_data.setup(s_data.priv);
 	}
@@ -195,21 +199,29 @@ int t_end(int passed, const char *func)
 	if (s_data.teardown) {
 		s_data.teardown(s_data.priv);
 	}
-	if (passed) {
-		int len = 0;
-		for (int i = 0; i < s_data.depth; i++) {
-			len += pv();
-		}
-		len += pvr();
 
-		t_printf("\033[0;32m%-*s          OK\033[0m\n", s_data.width - len, func);
-
-		s_data.passed++;
-		return 0;
+	if (!passed) {
+		s_data.failed++;
+		return 1;
 	}
 
-	s_data.failed++;
-	return 1;
+	int len = 0;
+	for (int i = 0; i < s_data.depth; i++) {
+		len += pv();
+	}
+	len += pvr();
+
+	size_t mem = mem_get()->mem;
+	if (s_data.mem != mem) {
+		t_printf("\033[0;31m%-*s          LEAKED %d B\033[0m\n", s_data.width - len, func, mem - s_data.mem);
+		s_data.failed++;
+		return 1;
+	}
+
+	t_printf("\033[0;32m%-*s          OK\033[0m\n", s_data.width - len, func);
+
+	s_data.passed++;
+	return 0;
 }
 
 void t_sstart(const char *func)

@@ -24,6 +24,7 @@ typedef struct tdata_s {
 	size_t buf_len;
 	const char *exp;
 	size_t exp_len;
+	size_t mem;
 } tdata_t;
 
 extern tdata_t t_get_data();

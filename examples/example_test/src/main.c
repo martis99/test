@@ -1,5 +1,7 @@
 #include "test.h"
 
+#include "cplatform.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -77,6 +79,9 @@ int main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
+	cplatform_t cplatform = { 0 };
+	cplatform_init(&cplatform);
+
 	printf(SEC, "main");
 	t_init(80);
 	t_run(tests, 1);
@@ -99,6 +104,8 @@ int main(int argc, char **argv)
 
 	printf(SEC, "setup_teardown");
 	setup_teardown();
+
+	cplatform_free(&cplatform);
 
 	return 0;
 }
