@@ -1,5 +1,6 @@
 #include "test_test.h"
 
+#include "mem.h"
 #include "test.h"
 #include "test_cplatform.h"
 #include "type.h"
@@ -511,6 +512,28 @@ TEST(t_t_run)
 	END;
 }
 
+TEST(t_t_end)
+{
+	START;
+
+	tdata_t tdata = t_get_data();
+
+	t_set_print(PRINT_DST_NONE());
+	t_set_wprint(PRINT_DST_WNONE());
+
+	t_start();
+
+	void *data = mem_alloc(1);
+
+	EXPECT_EQ(t_end(1, ""), 1);
+
+	mem_free(data, 1);
+
+	t_set_data(tdata);
+
+	END;
+}
+
 TEST(t_t_set_priv)
 {
 	START;
@@ -648,6 +671,7 @@ TEST(tests)
 	RUN(parent_test);
 
 	RUN(t_t_run);
+	RUN(t_t_end);
 	RUN(t_t_set_priv);
 	RUN(t_t_setup_teardown);
 	RUN(t_t_expect);
