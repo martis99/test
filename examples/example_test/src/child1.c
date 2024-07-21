@@ -1,5 +1,3 @@
-#include "child1.h"
-
 #include "test.h"
 
 TEST(grand_child1)

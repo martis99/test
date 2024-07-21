@@ -1,6 +1,6 @@
-#include "child1.h"
-
 #include "test.h"
+
+STEST(child1);
 
 TEST(grand_child2)
 {
