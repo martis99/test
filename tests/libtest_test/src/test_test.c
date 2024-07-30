@@ -590,10 +590,10 @@ TEST(t_t_expect)
 	t_set_print(PRINT_DST_NONE());
 	t_set_wprint(PRINT_DST_WNONE());
 
-	t_expect_g(1, __func__, __LINE__, "", 2, "", 0, "==");
-	t_expect_g(1, __func__, __LINE__, "", 4, "", 3, "==");
-	t_expect_g(1, __func__, __LINE__, "", 8, "", 7, "==");
-	t_expect_g(1, __func__, __LINE__, "", 7, "", 7, "==");
+	t_expect_g(1, __FILE__, __func__, __LINE__, "", 2, "", 0, "==");
+	t_expect_g(1, __FILE__, __func__, __LINE__, "", 4, "", 3, "==");
+	t_expect_g(1, __FILE__, __func__, __LINE__, "", 8, "", 7, "==");
+	t_expect_g(1, __FILE__, __func__, __LINE__, "", 7, "", 7, "==");
 
 	t_set_data(tdata);
 

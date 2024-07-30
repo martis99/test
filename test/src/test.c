@@ -487,7 +487,7 @@ static void print_values(int passed, const char *func, const char *act, size_t a
 	t_printf("%*s", add, "");
 }
 
-void t_expect_ch(int passed, const char *func, int line, const char *check)
+void t_expect_ch(int passed, const char *file, const char *func, int line, const char *check)
 {
 	int exp_width = s_data.width - print_header(passed, func, 0);
 
@@ -510,30 +510,31 @@ void t_expect_ch(int passed, const char *func, int line, const char *check)
 	const int over = MAX(act_width - exp_width, 0);
 	const int add  = MAX(9 - over, 0);
 
-	t_printf("\033[0;31m%*s%s%*s L%d\033[0m\n", l, "", check, r + a + add, "", line);
+	t_printf("\033[0;31m%*s%s%*s %s:%d\033[0m\n", l, "", check, r + a + add, "", file, line);
 }
 
-void t_expect_g(int passed, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, ...)
+void t_expect_g(int passed, const char *file, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, ...)
 {
 	va_list args;
 	va_start(args, cond);
 	print_values(passed, func, act, act_size, exp, exp_size, cond, 9, args);
 	va_end(args);
 
-	t_printf(" L%d\033[0m\n", line);
+	t_printf(" %s:%d\033[0m\n", file, line);
 }
 
-void t_expect_m(int passed, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond, unsigned char mask, ...)
+void t_expect_m(int passed, const char *file, const char *func, int line, const char *act, size_t act_size, const char *exp, size_t exp_size, const char *cond,
+		unsigned char mask, ...)
 {
 	va_list args;
 	va_start(args, mask);
 	print_values(passed, func, act, act_size, exp, exp_size, cond, 0, args);
 	va_end(args);
 
-	t_printf(" " BYTE_TO_BIN_PATTERN " L%d\033[0m\n", BYTE_TO_BIN(mask), line);
+	t_printf(" " BYTE_TO_BIN_PATTERN " %s:%d\033[0m\n", BYTE_TO_BIN(mask), file, line);
 }
 
-static void print_str(int passed, const char *func, int line, const char *act_str, const char *exp_str, size_t act_len, size_t exp_len)
+static void print_str(int passed, const char *file, const char *func, int line, const char *act_str, const char *exp_str, size_t act_len, size_t exp_len)
 {
 	size_t ln	    = 0;
 	size_t col	    = 0;
@@ -584,7 +585,7 @@ static void print_str(int passed, const char *func, int line, const char *act_st
 
 	const int exp_width = s_data.width - print_header(passed, func, 0);
 
-	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
+	t_printf("\033[0;31m%*s          %s:%d\033[0m\n", MAX(exp_width, 0), "", file, line);
 	print_header(passed, func, 1);
 	t_printf("\033[0;31m");
 
@@ -625,7 +626,7 @@ static void print_str(int passed, const char *func, int line, const char *act_st
 	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 }
 
-static void print_wstr(int passed, const char *func, int line, const wchar_t *act_str, const wchar_t *exp_str, size_t act_len, size_t exp_len)
+static void print_wstr(int passed, const char *file, const char *func, int line, const wchar_t *act_str, const wchar_t *exp_str, size_t act_len, size_t exp_len)
 {
 	size_t ln	    = 0;
 	size_t col	    = 0;
@@ -676,7 +677,7 @@ static void print_wstr(int passed, const char *func, int line, const wchar_t *ac
 
 	const int exp_width = s_data.width - print_header(passed, func, 0);
 
-	t_printf("\033[0;31m%*s          L%d\033[0m\n", MAX(exp_width, 0), "", line);
+	t_printf("\033[0;31m%*s          %s:%d\033[0m\n", MAX(exp_width, 0), "", file, line);
 	print_header(passed, func, 1);
 	t_printf("\033[0;31m");
 
@@ -717,37 +718,37 @@ static void print_wstr(int passed, const char *func, int line, const wchar_t *ac
 	t_printf("\033[0;31m%*s^\033[0m\n", h_len + MIN(act_app, exp_app) + col, "");
 }
 
-void t_expect_fmt(int passed, const char *func, int line, const char *act, unsigned int cnt, ...)
+void t_expect_fmt(int passed, const char *file, const char *func, int line, const char *act, unsigned int cnt, ...)
 {
 	va_list args;
 	va_start(args, cnt);
 	const char *exp = va_arg(args, const char *);
 	va_end(args);
 
-	print_str(passed, func, line, act, exp, (int)strlen(act), (int)strlen(exp));
+	print_str(passed, file, func, line, act, exp, (int)strlen(act), (int)strlen(exp));
 }
 
-void t_expect_str(int passed, const char *func, int line, const char *act, const char *exp)
+void t_expect_str(int passed, const char *file, const char *func, int line, const char *act, const char *exp)
 {
-	print_str(passed, func, line, act, exp, act == NULL ? 0 : (int)strlen(act), exp == NULL ? 0 : (int)strlen(exp));
+	print_str(passed, file, func, line, act, exp, act == NULL ? 0 : (int)strlen(act), exp == NULL ? 0 : (int)strlen(exp));
 }
 
-void t_expect_strn(int passed, const char *func, int line, const char *act, const char *exp, size_t len)
+void t_expect_strn(int passed, const char *file, const char *func, int line, const char *act, const char *exp, size_t len)
 {
-	print_str(passed, func, line, act, exp, (int)MIN(len, act == NULL ? 0 : strlen(act)), (int)MIN(len, exp == NULL ? 0 : strlen(exp)));
+	print_str(passed, file, func, line, act, exp, (int)MIN(len, act == NULL ? 0 : strlen(act)), (int)MIN(len, exp == NULL ? 0 : strlen(exp)));
 }
 
-void t_expect_wstr(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp)
+void t_expect_wstr(int passed, const char *file, const char *func, int line, const wchar_t *act, const wchar_t *exp)
 {
-	print_wstr(passed, func, line, act, exp, act == NULL ? 0 : (int)wcslen(act), exp == NULL ? 0 : (int)wcslen(exp));
+	print_wstr(passed, file, func, line, act, exp, act == NULL ? 0 : (int)wcslen(act), exp == NULL ? 0 : (int)wcslen(exp));
 }
 
-void t_expect_wstrn(int passed, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len)
+void t_expect_wstrn(int passed, const char *file, const char *func, int line, const wchar_t *act, const wchar_t *exp, size_t len)
 {
-	print_wstr(passed, func, line, act, exp, (int)MIN(len, act == NULL ? 0 : wcslen(act)), (int)MIN(len, exp == NULL ? 0 : wcslen(exp)));
+	print_wstr(passed, file, func, line, act, exp, (int)MIN(len, act == NULL ? 0 : wcslen(act)), (int)MIN(len, exp == NULL ? 0 : wcslen(exp)));
 }
 
-void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
+void t_expect_fail(int passed, const char *file, const char *func, int line, const char *fmt, ...)
 {
 	int len = print_header(passed, func, 0);
 
@@ -756,7 +757,7 @@ void t_expect_fail(int passed, const char *func, int line, const char *fmt, ...)
 
 	t_printf("\033[0;31m");
 	len += t_printv(fmt, args);
-	t_printf("%*s L%d\033[0m\n", MAX(s_data.width - len + 9, 0), "", line);
+	t_printf("%*s %s:%d\033[0m\n", MAX(s_data.width - len + 9, 0), "", file, line);
 
 	va_end(args);
 }
@@ -793,12 +794,12 @@ void t_expect_fstr_start(const char *exp, size_t len)
 	s_data.buf_len = 0;
 }
 
-int t_expect_fstr_end(int passed, const char *func, int line)
+int t_expect_fstr_end(int passed, const char *file, const char *func, int line)
 {
 	const int ret = t_strcmp(s_data.buf, s_data.exp);
 
 	if (ret != 0) {
-		print_str(passed, func, line, s_data.buf, s_data.exp, s_data.buf_len, s_data.exp_len);
+		print_str(passed, file, func, line, s_data.buf, s_data.exp, s_data.buf_len, s_data.exp_len);
 	}
 
 	return ret;
